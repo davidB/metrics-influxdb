@@ -6,10 +6,8 @@
 	<groupId>com.novaquark</groupId>
 	<artifactId>metrics-influxdb</artifactId>
 	<version>0.2.0</version>
-	<name>Influxdb Integration for Metrics</name>
-	<description>
-        A reporter for Metrics which announces measurements to an Influxdb server.
-    </description>
+	<name>${project.artifactId}</name>
+	<description>A reporter for Metrics which announces measurements to an InfluxDB server.</description>
 
 	<dependencies>
 		<dependency>
@@ -61,4 +59,18 @@
 			</plugin>
 		</plugins>
 	</build>
+	<url>https://github.com/novaquark/metrics-influxdb</url>
+	<organization>
+		<name>novaquark</name>
+		<url>https://github.com/novaquark/</url>
+	</organization>
+	<scm>
+		<connection>scm:git:git://github.com/novaquark/${project.artifactId}.git</connection>
+		<developerConnection>scm:git:git@github.com:novaquark/${project.artifactId}.git</developerConnection>
+		<url>https://github.com/novaquark/${project.artifactId}/</url>
+	</scm>
+	<issueManagement>
+		<url>http://github.com/novaquark/${project.artifactId}/issues#issue/</url>
+		<system>github</system>
+	</issueManagement>
 </project>

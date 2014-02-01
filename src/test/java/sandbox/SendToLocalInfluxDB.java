@@ -2,13 +2,14 @@ package sandbox;
 
 import java.util.concurrent.TimeUnit;
 
+import metrics_influxdb.Influxdb;
+import metrics_influxdb.InfluxdbReporter;
+
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
-import com.novaquark.metrics.influxdb.Influxdb;
-import com.novaquark.metrics.influxdb.InfluxdbReporter;
 
 public class SendToLocalInfluxDB {
 

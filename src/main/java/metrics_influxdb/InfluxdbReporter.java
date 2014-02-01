@@ -1,4 +1,4 @@
-package com.novaquark.metrics.influxdb;
+package metrics_influxdb;
 
 import java.io.IOException;
 import java.util.Map;

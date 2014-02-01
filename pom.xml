@@ -5,7 +5,7 @@
 
 	<groupId>com.novaquark</groupId>
 	<artifactId>metrics-influxdb</artifactId>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 	<name>Influxdb Integration for Metrics</name>
 	<description>
         A reporter for Metrics which announces measurements to an Influxdb server.
@@ -16,6 +16,7 @@
 			<groupId>com.codahale.metrics</groupId>
 			<artifactId>metrics-core</artifactId>
 			<version>3.0.1</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

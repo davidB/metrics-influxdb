@@ -2,13 +2,39 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
 
 	<groupId>com.novaquark</groupId>
 	<artifactId>metrics-influxdb</artifactId>
-	<version>0.2.0</version>
+	<version>0.3.0-SNAPSHOT</version>
 	<name>${project.artifactId}</name>
-	<description>A reporter for Metrics which announces measurements to an InfluxDB server.</description>
-
+	<description>A reporter for metrics which announces measurements to an InfluxDB server.</description>
+	<url>https://github.com/novaquark/metrics-influxdb</url>
+	<inceptionYear>2014</inceptionYear>
+	<organization>
+		<name>novaquark</name>
+		<url>https://github.com/novaquark/</url>
+	</organization>
+	<scm>
+		<connection>scm:git:git://github.com/novaquark/${project.artifactId}.git</connection>
+		<developerConnection>scm:git:git@github.com:novaquark/${project.artifactId}.git</developerConnection>
+		<url>https://github.com/novaquark/${project.artifactId}/</url>
+	</scm>
+	<issueManagement>
+		<url>http://github.com/novaquark/${project.artifactId}/issues#issue/</url>
+		<system>github</system>
+	</issueManagement>
+	<licenses>
+		<license>
+			<name>Public domain (CC0)</name>
+			<url>http://creativecommons.org/publicdomain/zero/1.0/</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 	<dependencies>
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>
@@ -59,18 +85,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	<url>https://github.com/novaquark/metrics-influxdb</url>
-	<organization>
-		<name>novaquark</name>
-		<url>https://github.com/novaquark/</url>
-	</organization>
-	<scm>
-		<connection>scm:git:git://github.com/novaquark/${project.artifactId}.git</connection>
-		<developerConnection>scm:git:git@github.com:novaquark/${project.artifactId}.git</developerConnection>
-		<url>https://github.com/novaquark/${project.artifactId}/</url>
-	</scm>
-	<issueManagement>
-		<url>http://github.com/novaquark/${project.artifactId}/issues#issue/</url>
-		<system>github</system>
-	</issueManagement>
+
 </project>

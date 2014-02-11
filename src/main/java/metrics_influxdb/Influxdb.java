@@ -58,7 +58,7 @@ public class Influxdb {
 
   public final URL url;
   private final StringBuilder json = new StringBuilder();
-  /** true => to print Json on System.out */
+  /** true => to print Json on System.err */
   public boolean debugJson = false;
 
   public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception {

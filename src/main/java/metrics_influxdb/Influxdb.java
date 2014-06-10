@@ -108,6 +108,8 @@ public class Influxdb {
         Object value = row[j];
         if (value instanceof String) {
           json.append('"').append(value).append('"');
+        } else if((value instanceof Collection) && ((Collection)value).size()<1) {
+        	json.append("null");
         } else {
           json.append(value);
         }

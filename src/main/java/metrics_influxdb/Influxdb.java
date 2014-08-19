@@ -44,14 +44,14 @@ import java.util.concurrent.TimeUnit;
 public class Influxdb {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
-  public static char toTimePrecision(TimeUnit t) {
+  public static String toTimePrecision(TimeUnit t) {
     switch (t) {
     case SECONDS:
-      return 's';
+      return "s";
     case MILLISECONDS:
-      return 'm';
+      return "ms";
     case MICROSECONDS:
-      return 'u';
+      return "u";
     default:
       throw new IllegalArgumentException("time precision should be SECONDS or MILLISECONDS or MICROSECONDS");
     }

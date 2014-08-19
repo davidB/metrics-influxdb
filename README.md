@@ -2,7 +2,7 @@ A reporter for [metrics](http://metrics.codahale.com/) which announces measureme
 
 ## Usage sample :
 
-	private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws IOException {
+	private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws Exception {
 		final Influxdb influxdb = new Influxdb("127.0.0.1", 8086, "mydb", "user", "pass");
 		final InfluxdbReporter reporter = InfluxdbReporter
 				.forRegistry(registry)

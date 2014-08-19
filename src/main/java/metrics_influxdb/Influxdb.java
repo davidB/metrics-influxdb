@@ -14,7 +14,6 @@ package metrics_influxdb;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -65,7 +64,7 @@ public class Influxdb {
    * Constructor with the InfluxDB time_precision parameter set to TimeUnit.MILLISECONDS
    * @throws IOException If the URL is malformed
    */
-  public Influxdb(String host, int port, String database, String username, String password) throws IOException  {
+  public Influxdb(String host, int port, String database, String username, String password) throws Exception  {
     this(host, port, database, username, password, TimeUnit.MILLISECONDS);
   }
   
@@ -75,23 +74,16 @@ public class Influxdb {
    *                      that does not return milliseconds epoch time for getTime()
    * @throws IOException If the URL is malformed
    */
-  public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws IOException  {
-    try {
-      String encodedUsername = URLEncoder.encode(username, UTF_8.name());
-      this.url = new URL("http", host, port, "/db/" + database + "/series?u=" + encodedUsername + "&p=" + password + 
-          "&time_precision=" + toTimePrecision(timePrecision));
-    } catch (UnsupportedEncodingException e) {
-      // All JVMs are required to support UTF-8, so if this happens it's a programming error,
-      // so don't require the user to catch it.
-      throw new RuntimeException(e);
-    }
+  public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception  {
+      this.url = new URL("http", host, port, "/db/" + database + "/series?u=" + URLEncoder.encode(username, UTF_8.name()) + "&p=" + 
+          password + "&time_precision=" + toTimePrecision(timePrecision));
   }
 
-  public Influxdb(URL url) {
+  public Influxdb(URL url) throws Exception {
     this.url = url;
   }
 
-  public int sendRequest(String json, boolean throwExc, boolean printJson) throws IOException {
+  public int sendRequest(String json, boolean throwExc, boolean printJson) throws Exception {
 
     // byte[] content = URLEncoder.encode(json.toString(),
     // "UTF-8").getBytes(UTF_8);
@@ -120,6 +112,6 @@ public class Influxdb {
     } else if (throwExc) {
       throw new IOException("Server returned HTTP response code: " + responseCode + "for URL: " + url + " with content :'" + con.getResponseMessage() + "'");
     }
-  return responseCode;
+    return responseCode;
   }
 }

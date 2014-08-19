@@ -14,6 +14,7 @@ package metrics_influxdb;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -57,103 +58,57 @@ public class Influxdb {
   }
 
   public final URL url;
-  private final StringBuilder json = new StringBuilder();
   /** true => to print Json on System.err */
   public boolean debugJson = false;
-
-  public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception {
-    this(new URL("http", host, port, "/db/" + database + "/series?u=" + URLEncoder.encode(username, UTF_8.name()) + "&p=" + password + "&time_precision=" + toTimePrecision(timePrecision)));
-  }
-
-  public Influxdb(URL url) throws Exception {
-    this.url = url;
-    resetRequest();
-  }
-
+  
   /**
-   * Forgot previously appendSeries.
+   * @throws IOException If the URL is malformed
    */
-  public void resetRequest() {
-    json.setLength(0);
-    json.append('[');
-  }
-
-  /**
-   * Append series of data into the next Request to send.
-   * 
-   * @param namePrefix
-   * @param name
-   * @param nameSuffix
-   * @param columns
-   * @param points
-   */
-  public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
-    if (json.length() > 1)
-      json.append(',');
-    json.append("{\"name\":\"").append(namePrefix).append(name).append(nameSuffix).append("\",\"columns\":[");
-    for (int i = 0; i < columns.length; i++) {
-      if (i > 0)
-        json.append(',');
-      json.append('"').append(columns[i]).append('"');
-    }
-    json.append("],\"points\":[");
-    for (int i = 0; i < points.length; i++) {
-      if (i > 0)
-        json.append(',');
-      Object[] row = points[i];
-      json.append('[');
-      for (int j = 0; j < row.length; j++) {
-        if (j > 0)
-          json.append(',');
-        Object value = row[j];
-        if (value instanceof String) {
-          json.append('"').append(value).append('"');
-        } else {
-          json.append(value);
-        }
-      }
-      json.append(']');
-    }
-    json.append("]}");
-  }
-
-  public int sendRequest(boolean throwExc, boolean printJson) throws Exception {
-    int lg = json.length();
+  public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws IOException  {
     try {
-      json.append(']');
-      // byte[] content = URLEncoder.encode(json.toString(),
-      // "UTF-8").getBytes(UTF_8);
-      byte[] content = json.toString().getBytes(UTF_8);
-      if (printJson || debugJson) {
-        System.err.println("----");
-        System.err.println(json);
-        System.err.println("----");
-      }
-
-      HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-      con.setRequestMethod("POST");
-      // con.setRequestProperty("User-Agent", "InfluxDB-jvm");
-
-      // Send post request
-      con.setDoOutput(true);
-      OutputStream wr = con.getOutputStream();
-      wr.write(content);
-      wr.flush();
-      wr.close();
-
-      int responseCode = con.getResponseCode();
-      if (responseCode == HttpURLConnection.HTTP_OK) {
-        // ignore Response content
-        con.getInputStream().close();
-        resetRequest();
-      } else if (throwExc) {
-        throw new IOException("Server returned HTTP response code: " + responseCode + "for URL: " + url + " with content :'" + con.getResponseMessage() + "'");
-      }
-      return responseCode;
-    } catch (Exception exc) {
-      json.setLength(lg);
-      throw exc;
+      String encodedUsername = URLEncoder.encode(username, UTF_8.name());
+      this.url = new URL("http", host, port, "/db/" + database + "/series?u=" + encodedUsername + "&p=" + password + 
+          "&time_precision=" + toTimePrecision(timePrecision));
+    } catch (UnsupportedEncodingException e) {
+      // All JVMs are required to support UTF-8, so if this happens it's a programming error,
+      // so don't require the user to catch it.
+      throw new RuntimeException(e);
     }
+  }
+
+  public Influxdb(URL url) {
+    this.url = url;
+  }
+
+  public int sendRequest(String json, boolean throwExc, boolean printJson) throws IOException {
+
+    // byte[] content = URLEncoder.encode(json.toString(),
+    // "UTF-8").getBytes(UTF_8);
+    if (printJson || debugJson) {
+      System.err.println("----");
+      System.err.println(json);
+      System.err.println("----");
+    }
+
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+    con.setRequestMethod("POST");
+    // con.setRequestProperty("User-Agent", "InfluxDB-jvm");
+
+    // Send post request
+    con.setDoOutput(true);
+    OutputStream wr = con.getOutputStream();
+    wr.write(json.getBytes(UTF_8));
+    wr.flush();
+    wr.close();
+
+    int responseCode = con.getResponseCode();
+    if (responseCode == HttpURLConnection.HTTP_OK) {
+      // ignore Response content
+      con.getInputStream().close();
+    } else if (throwExc) {
+      throw new IOException("Server returned HTTP response code: " + responseCode + "for URL: " + url + " with content :'" + con.getResponseMessage() + "'");
+    }
+  return responseCode;
   }
 }

@@ -12,7 +12,6 @@
 //	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>. 
 package metrics_influxdb;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
@@ -178,6 +177,7 @@ public class InfluxdbReporter extends ScheduledReporter {
   private final Influxdb influxdb;
   private final Clock clock;
   private final String prefix;
+  private final InfluxdbJsonBuilder jsonBuilder = new InfluxdbJsonBuilder();
 
   // Optimization : use pointsXxx to reduce object creation, by reuse as arg of
   // Influxdb.appendSeries(...)
@@ -252,6 +252,8 @@ public class InfluxdbReporter extends ScheduledReporter {
 
     // oh it'd be lovely to use Java 7 here
     try {
+      jsonBuilder.resetJson();
+      
       for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
         reportGauge(entry.getKey(), entry.getValue(), timestamp);
       }
@@ -271,14 +273,15 @@ public class InfluxdbReporter extends ScheduledReporter {
       for (Map.Entry<String, Timer> entry : timers.entrySet()) {
         reportTimer(entry.getKey(), entry.getValue(), timestamp);
       }
-      influxdb.sendRequest(true, false);
+      jsonBuilder.endJson();
+      
+      influxdb.sendRequest(jsonBuilder.toString(), true, false);
     } catch (Exception e) {
-      influxdb.resetRequest();
-      LOGGER.warn("Unable to report to InfluxDB, forgot data", influxdb, e);
+      LOGGER.warn("Unable to report to InfluxDB. Discarding data.", e);
     }
   }
 
-  private void reportTimer(String name, Timer timer, long timestamp) throws IOException {
+  private void reportTimer(String name, Timer timer, long timestamp) {
     final Snapshot snapshot = timer.getSnapshot();
     Object[] p = pointsTimer[0];
     p[0] = timestamp;
@@ -297,10 +300,10 @@ public class InfluxdbReporter extends ScheduledReporter {
     p[13] = convertRate(timer.getFifteenMinuteRate());
     p[14] = convertRate(timer.getMeanRate());
     assert (p.length == COLUMNS_TIMER.length);
-    influxdb.appendSeries(prefix, name, ".timer", COLUMNS_TIMER, pointsTimer);
+    jsonBuilder.appendSeries(prefix, name, ".timer", COLUMNS_TIMER, pointsTimer);
   }
 
-  private void reportHistogram(String name, Histogram histogram, long timestamp) throws IOException {
+  private void reportHistogram(String name, Histogram histogram, long timestamp) {
     final Snapshot snapshot = histogram.getSnapshot();
     Object[] p = pointsHistogram[0];
     p[0] = timestamp;
@@ -315,26 +318,26 @@ public class InfluxdbReporter extends ScheduledReporter {
     p[9] = snapshot.get99thPercentile();
     p[10] = snapshot.get999thPercentile();
     assert (p.length == COLUMNS_HISTOGRAM.length);
-    influxdb.appendSeries(prefix, name, ".histogram", COLUMNS_HISTOGRAM, pointsHistogram);
+    jsonBuilder.appendSeries(prefix, name, ".histogram", COLUMNS_HISTOGRAM, pointsHistogram);
   }
 
-  private void reportCounter(String name, Counter counter, long timestamp) throws IOException {
+  private void reportCounter(String name, Counter counter, long timestamp) {
     Object[] p = pointsCounter[0];
     p[0] = timestamp;
     p[1] = counter.getCount();
     assert (p.length == COLUMNS_COUNT.length);
-    influxdb.appendSeries(prefix, name, ".count", COLUMNS_COUNT, pointsCounter);
+    jsonBuilder.appendSeries(prefix, name, ".count", COLUMNS_COUNT, pointsCounter);
   }
 
-  private void reportGauge(String name, Gauge<?> gauge, long timestamp) throws IOException {
+  private void reportGauge(String name, Gauge<?> gauge, long timestamp) {
     Object[] p = pointsGauge[0];
     p[0] = timestamp;
     p[1] = gauge.getValue();
     assert (p.length == COLUMNS_GAUGE.length);
-    influxdb.appendSeries(prefix, name, ".value", COLUMNS_GAUGE, pointsGauge);
+    jsonBuilder.appendSeries(prefix, name, ".value", COLUMNS_GAUGE, pointsGauge);
   }
 
-  private void reportMeter(String name, Metered meter, long timestamp) throws IOException {
+  private void reportMeter(String name, Metered meter, long timestamp) {
     Object[] p = pointsMeter[0];
     p[0] = timestamp;
     p[1] = meter.getCount();
@@ -343,7 +346,7 @@ public class InfluxdbReporter extends ScheduledReporter {
     p[4] = convertRate(meter.getFifteenMinuteRate());
     p[5] = convertRate(meter.getMeanRate());
     assert (p.length == COLUMNS_METER.length);
-    influxdb.appendSeries(prefix, name, ".meter", COLUMNS_METER, pointsMeter);
+    jsonBuilder.appendSeries(prefix, name, ".meter", COLUMNS_METER, pointsMeter);
   }
 
   // private String format(Object o) {

@@ -12,6 +12,7 @@
 //	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>. 
 package sandbox;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import metrics_influxdb.Influxdb;
@@ -55,7 +56,7 @@ public class SendToLocalInfluxDB {
     }
   }
 
-  private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws Exception {
+  private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws IOException {
     final Influxdb influxdb = new Influxdb("127.0.0.1", 8086, "dev", "u0", "u0PWD", TimeUnit.MILLISECONDS);
     final InfluxdbReporter reporter = InfluxdbReporter
         .forRegistry(registry)
@@ -68,7 +69,7 @@ public class SendToLocalInfluxDB {
     return reporter;
   }
 
-  private static ConsoleReporter startConsoleReporter(MetricRegistry registry) throws Exception {
+  private static ConsoleReporter startConsoleReporter(MetricRegistry registry) throws IOException {
     final ConsoleReporter reporter = ConsoleReporter
         .forRegistry(registry)
         .convertRatesTo(TimeUnit.SECONDS)

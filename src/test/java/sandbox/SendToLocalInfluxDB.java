@@ -57,7 +57,7 @@ public class SendToLocalInfluxDB {
   }
 
   private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws IOException {
-    final Influxdb influxdb = new Influxdb("127.0.0.1", 8086, "dev", "u0", "u0PWD", TimeUnit.MILLISECONDS);
+    final Influxdb influxdb = new Influxdb("127.0.0.1", 8086, "dev", "u0", "u0PWD");
     final InfluxdbReporter reporter = InfluxdbReporter
         .forRegistry(registry)
         .prefixedWith("test")

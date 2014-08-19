@@ -4,7 +4,7 @@ class InfluxdbJsonBuilder {
   private final StringBuilder json = new StringBuilder();
 
   /**
-   * Forgot previously appendSeries.
+   * Forget previous appendSeries.
    */
   public void resetJson() {
     json.setLength(0);

@@ -60,8 +60,19 @@ public class Influxdb {
   public final URL url;
   /** true => to print Json on System.err */
   public boolean debugJson = false;
+
+  /**
+   * Constructor with the InfluxDB time_precision parameter set to TimeUnit.MILLISECONDS
+   * @throws IOException If the URL is malformed
+   */
+  public Influxdb(String host, int port, String database, String username, String password) throws IOException  {
+    this(host, port, database, username, password, TimeUnit.MILLISECONDS);
+  }
   
   /**
+   * @param timePrecision The precision of the epoch time that is sent to the server,
+   *                      should be TimeUnit.MILLISECONDS unless you are using a custom Clock
+   *                      that does not return milliseconds epoch time for getTime()
    * @throws IOException If the URL is malformed
    */
   public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws IOException  {

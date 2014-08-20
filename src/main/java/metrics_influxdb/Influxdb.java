@@ -43,117 +43,75 @@ import java.util.concurrent.TimeUnit;
 public class Influxdb {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
-  public static char toTimePrecision(TimeUnit t) {
+  public static String toTimePrecision(TimeUnit t) {
     switch (t) {
     case SECONDS:
-      return 's';
+      return "s";
     case MILLISECONDS:
-      return 'm';
+      return "ms";
     case MICROSECONDS:
-      return 'u';
+      return "u";
     default:
       throw new IllegalArgumentException("time precision should be SECONDS or MILLISECONDS or MICROSECONDS");
     }
   }
 
   public final URL url;
-  private final StringBuilder json = new StringBuilder();
   /** true => to print Json on System.err */
   public boolean debugJson = false;
 
-  public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception {
-    this(new URL("http", host, port, "/db/" + database + "/series?u=" + URLEncoder.encode(username, UTF_8.name()) + "&p=" + password + "&time_precision=" + toTimePrecision(timePrecision)));
+  /**
+   * Constructor with the InfluxDB time_precision parameter set to TimeUnit.MILLISECONDS
+   * @throws IOException If the URL is malformed
+   */
+  public Influxdb(String host, int port, String database, String username, String password) throws Exception  {
+    this(host, port, database, username, password, TimeUnit.MILLISECONDS);
+  }
+  
+  /**
+   * @param timePrecision The precision of the epoch time that is sent to the server,
+   *                      should be TimeUnit.MILLISECONDS unless you are using a custom Clock
+   *                      that does not return milliseconds epoch time for getTime()
+   * @throws IOException If the URL is malformed
+   */
+  public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception  {
+      this.url = new URL("http", host, port, "/db/" + database + "/series?u=" + URLEncoder.encode(username, UTF_8.name()) + "&p=" + 
+          password + "&time_precision=" + toTimePrecision(timePrecision));
   }
 
   public Influxdb(URL url) throws Exception {
     this.url = url;
-    resetRequest();
   }
 
-  /**
-   * Forgot previously appendSeries.
-   */
-  public void resetRequest() {
-    json.setLength(0);
-    json.append('[');
-  }
+  public int sendRequest(String json, boolean throwExc, boolean printJson) throws Exception {
 
-  /**
-   * Append series of data into the next Request to send.
-   * 
-   * @param namePrefix
-   * @param name
-   * @param nameSuffix
-   * @param columns
-   * @param points
-   */
-  public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
-    if (json.length() > 1)
-      json.append(',');
-    json.append("{\"name\":\"").append(namePrefix).append(name).append(nameSuffix).append("\",\"columns\":[");
-    for (int i = 0; i < columns.length; i++) {
-      if (i > 0)
-        json.append(',');
-      json.append('"').append(columns[i]).append('"');
+    // byte[] content = URLEncoder.encode(json.toString(),
+    // "UTF-8").getBytes(UTF_8);
+    if (printJson || debugJson) {
+      System.err.println("----");
+      System.err.println(json);
+      System.err.println("----");
     }
-    json.append("],\"points\":[");
-    for (int i = 0; i < points.length; i++) {
-      if (i > 0)
-        json.append(',');
-      Object[] row = points[i];
-      json.append('[');
-      for (int j = 0; j < row.length; j++) {
-        if (j > 0)
-          json.append(',');
-        Object value = row[j];
-        if (value instanceof String) {
-          json.append('"').append(value).append('"');
-        } else {
-          json.append(value);
-        }
-      }
-      json.append(']');
+
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+    con.setRequestMethod("POST");
+    // con.setRequestProperty("User-Agent", "InfluxDB-jvm");
+
+    // Send post request
+    con.setDoOutput(true);
+    OutputStream wr = con.getOutputStream();
+    wr.write(json.getBytes(UTF_8));
+    wr.flush();
+    wr.close();
+
+    int responseCode = con.getResponseCode();
+    if (responseCode == HttpURLConnection.HTTP_OK) {
+      // ignore Response content
+      con.getInputStream().close();
+    } else if (throwExc) {
+      throw new IOException("Server returned HTTP response code: " + responseCode + "for URL: " + url + " with content :'" + con.getResponseMessage() + "'");
     }
-    json.append("]}");
-  }
-
-  public int sendRequest(boolean throwExc, boolean printJson) throws Exception {
-    int lg = json.length();
-    try {
-      json.append(']');
-      // byte[] content = URLEncoder.encode(json.toString(),
-      // "UTF-8").getBytes(UTF_8);
-      byte[] content = json.toString().getBytes(UTF_8);
-      if (printJson || debugJson) {
-        System.err.println("----");
-        System.err.println(json);
-        System.err.println("----");
-      }
-
-      HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-      con.setRequestMethod("POST");
-      // con.setRequestProperty("User-Agent", "InfluxDB-jvm");
-
-      // Send post request
-      con.setDoOutput(true);
-      OutputStream wr = con.getOutputStream();
-      wr.write(content);
-      wr.flush();
-      wr.close();
-
-      int responseCode = con.getResponseCode();
-      if (responseCode == HttpURLConnection.HTTP_OK) {
-        // ignore Response content
-        con.getInputStream().close();
-        resetRequest();
-      } else if (throwExc) {
-        throw new IOException("Server returned HTTP response code: " + responseCode + "for URL: " + url + " with content :'" + con.getResponseMessage() + "'");
-      }
-      return responseCode;
-    } catch (Exception exc) {
-      json.setLength(lg);
-      throw exc;
-    }
+    return responseCode;
   }
 }

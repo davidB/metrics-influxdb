@@ -7,7 +7,7 @@
 		<version>7</version>
 	</parent>
 
-	<groupId>com.novaquark</groupId>
+	<groupId>net.alchim31</groupId>
 	<artifactId>metrics-influxdb</artifactId>
 	<version>0.4.0</version>
 	<name>${project.artifactId}</name>
@@ -44,7 +44,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.5</version>
+			<version>1.7.7</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.5</version>
+			<version>1.7.7</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

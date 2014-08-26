@@ -9,22 +9,18 @@
 
 	<groupId>net.alchim31</groupId>
 	<artifactId>metrics-influxdb</artifactId>
-	<version>0.4.0</version>
+	<version>0.4.0-SNAPSHOT</version>
 	<name>${project.artifactId}</name>
 	<description>A reporter for metrics which announces measurements to an InfluxDB server.</description>
-	<url>https://github.com/novaquark/metrics-influxdb</url>
+	<url>https://github.com/davidB/metrics-influxdb</url>
 	<inceptionYear>2014</inceptionYear>
-	<organization>
-		<name>novaquark</name>
-		<url>https://github.com/novaquark/</url>
-	</organization>
 	<scm>
-		<connection>scm:git:git://github.com/novaquark/${project.artifactId}.git</connection>
-		<developerConnection>scm:git:git@github.com:novaquark/${project.artifactId}.git</developerConnection>
-		<url>https://github.com/novaquark/${project.artifactId}/</url>
+		<connection>scm:git:git://github.com/davidB/${project.artifactId}.git</connection>
+		<developerConnection>scm:git:git@github.com:davidB/${project.artifactId}.git</developerConnection>
+		<url>https://github.com/davidB/${project.artifactId}/</url>
 	</scm>
 	<issueManagement>
-		<url>http://github.com/novaquark/${project.artifactId}/issues#issue/</url>
+		<url>http://github.com/davidB/${project.artifactId}/issues#issue/</url>
 		<system>github</system>
 	</issueManagement>
 	<licenses>

@@ -4,6 +4,8 @@ A reporter for [metrics](http://metrics.codahale.com/) which announces measureme
 
 	private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws Exception {
 		final Influxdb influxdb = new Influxdb("127.0.0.1", 8086, "mydb", "user", "pass");
+		//influxdb.debugJson = true; // to print json on System.err
+		//influxdb.jsonBuilder = new MyJsonBuildler(); // to use MyJsonBuilder to create json
 		final InfluxdbReporter reporter = InfluxdbReporter
 				.forRegistry(registry)
 				.prefixedWith("test")

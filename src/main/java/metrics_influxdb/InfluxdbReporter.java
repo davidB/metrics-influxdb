@@ -1,15 +1,15 @@
-//	metrics-influxdb 
-//	
-//	Written in 2014 by David Bernard <dbernard@novaquark.com> 
-//	
-//	[other author/contributor lines as appropriate] 
-//	
+//	metrics-influxdb
+//
+//	Written in 2014 by David Bernard <dbernard@novaquark.com>
+//
+//	[other author/contributor lines as appropriate]
+//
 //	To the extent possible under law, the author(s) have dedicated all copyright and
 //	related and neighboring rights to this software to the public domain worldwide.
-//	This software is distributed without any warranty. 
-//	
+//	This software is distributed without any warranty.
+//
 //	You should have received a copy of the CC0 Public Domain Dedication along with
-//	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>. 
+//	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 package metrics_influxdb;
 
 import java.util.Map;
@@ -33,7 +33,7 @@ import com.codahale.metrics.Timer;
 
 /**
  * A reporter which publishes metric values to a InfluxDB server.
- * 
+ *
  * @see <a href="http://influxdb.org/">InfluxDB - An open-source distributed
  *      time series database with no external dependencies.</a>
  */
@@ -62,7 +62,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 
   /**
    * Returns a new {@link Builder} for {@link InfluxdbReporter}.
-   * 
+   *
    * @param registry
    *          the registry to report
    * @return a {@link Builder} instance for a {@link InfluxdbReporter}
@@ -95,7 +95,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 
     /**
      * Use the given {@link Clock} instance for the time.
-     * 
+     *
      * @param clock
      *          a {@link Clock} instance
      * @return {@code this}
@@ -107,7 +107,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 
     /**
      * Prefix all metric names with the given string.
-     * 
+     *
      * @param prefix
      *          the prefix for all metric names
      * @return {@code this}
@@ -119,7 +119,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 
     /**
      * Convert rates to the given time unit.
-     * 
+     *
      * @param rateUnit
      *          a unit of time
      * @return {@code this}
@@ -131,7 +131,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 
     /**
      * Convert durations to the given time unit.
-     * 
+     *
      * @param durationUnit
      *          a unit of time
      * @return {@code this}
@@ -143,7 +143,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 
     /**
      * Only report metrics which match the given filter.
-     * 
+     *
      * @param filter
      *          a {@link MetricFilter}
      * @return {@code this}
@@ -156,7 +156,7 @@ public class InfluxdbReporter extends ScheduledReporter {
     /**
      * Builds a {@link InfluxdbReporter} with the given properties, sending
      * metrics using the given {@link Influxdb} client.
-     * 
+     *
      * @param influxdb
      *          a {@link Influxdb} client
      * @return a {@link InfluxdbReporter}
@@ -177,7 +177,6 @@ public class InfluxdbReporter extends ScheduledReporter {
   private final Influxdb influxdb;
   private final Clock clock;
   private final String prefix;
-  private final InfluxdbJsonBuilder jsonBuilder = new InfluxdbJsonBuilder();
 
   // Optimization : use pointsXxx to reduce object creation, by reuse as arg of
   // Influxdb.appendSeries(...)
@@ -252,8 +251,8 @@ public class InfluxdbReporter extends ScheduledReporter {
 
     // oh it'd be lovely to use Java 7 here
     try {
-      jsonBuilder.resetJson();
-      
+      influxdb.resetRequest();
+
       for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
         reportGauge(entry.getKey(), entry.getValue(), timestamp);
       }
@@ -273,9 +272,8 @@ public class InfluxdbReporter extends ScheduledReporter {
       for (Map.Entry<String, Timer> entry : timers.entrySet()) {
         reportTimer(entry.getKey(), entry.getValue(), timestamp);
       }
-      jsonBuilder.endJson();
-      
-      influxdb.sendRequest(jsonBuilder.toString(), true, false);
+
+      influxdb.sendRequest(true, false);
     } catch (Exception e) {
       LOGGER.warn("Unable to report to InfluxDB. Discarding data.", e);
     }
@@ -300,7 +298,7 @@ public class InfluxdbReporter extends ScheduledReporter {
     p[13] = convertRate(timer.getFifteenMinuteRate());
     p[14] = convertRate(timer.getMeanRate());
     assert (p.length == COLUMNS_TIMER.length);
-    jsonBuilder.appendSeries(prefix, name, ".timer", COLUMNS_TIMER, pointsTimer);
+    influxdb.appendSeries(prefix, name, ".timer", COLUMNS_TIMER, pointsTimer);
   }
 
   private void reportHistogram(String name, Histogram histogram, long timestamp) {
@@ -318,7 +316,7 @@ public class InfluxdbReporter extends ScheduledReporter {
     p[9] = snapshot.get99thPercentile();
     p[10] = snapshot.get999thPercentile();
     assert (p.length == COLUMNS_HISTOGRAM.length);
-    jsonBuilder.appendSeries(prefix, name, ".histogram", COLUMNS_HISTOGRAM, pointsHistogram);
+    influxdb.appendSeries(prefix, name, ".histogram", COLUMNS_HISTOGRAM, pointsHistogram);
   }
 
   private void reportCounter(String name, Counter counter, long timestamp) {
@@ -326,7 +324,7 @@ public class InfluxdbReporter extends ScheduledReporter {
     p[0] = timestamp;
     p[1] = counter.getCount();
     assert (p.length == COLUMNS_COUNT.length);
-    jsonBuilder.appendSeries(prefix, name, ".count", COLUMNS_COUNT, pointsCounter);
+    influxdb.appendSeries(prefix, name, ".count", COLUMNS_COUNT, pointsCounter);
   }
 
   private void reportGauge(String name, Gauge<?> gauge, long timestamp) {
@@ -334,7 +332,7 @@ public class InfluxdbReporter extends ScheduledReporter {
     p[0] = timestamp;
     p[1] = gauge.getValue();
     assert (p.length == COLUMNS_GAUGE.length);
-    jsonBuilder.appendSeries(prefix, name, ".value", COLUMNS_GAUGE, pointsGauge);
+    influxdb.appendSeries(prefix, name, ".value", COLUMNS_GAUGE, pointsGauge);
   }
 
   private void reportMeter(String name, Metered meter, long timestamp) {
@@ -346,7 +344,7 @@ public class InfluxdbReporter extends ScheduledReporter {
     p[4] = convertRate(meter.getFifteenMinuteRate());
     p[5] = convertRate(meter.getMeanRate());
     assert (p.length == COLUMNS_METER.length);
-    jsonBuilder.appendSeries(prefix, name, ".meter", COLUMNS_METER, pointsMeter);
+    influxdb.appendSeries(prefix, name, ".meter", COLUMNS_METER, pointsMeter);
   }
 
   // private String format(Object o) {

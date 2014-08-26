@@ -1,15 +1,15 @@
-//	metrics-influxdb 
-//	
-//	Written in 2014 by David Bernard <dbernard@novaquark.com> 
-//	
-//	[other author/contributor lines as appropriate] 
-//	
+//	metrics-influxdb
+//
+//	Written in 2014 by David Bernard <dbernard@novaquark.com>
+//
+//	[other author/contributor lines as appropriate]
+//
 //	To the extent possible under law, the author(s) have dedicated all copyright and
 //	related and neighboring rights to this software to the public domain worldwide.
-//	This software is distributed without any warranty. 
-//	
+//	This software is distributed without any warranty.
+//
 //	You should have received a copy of the CC0 Public Domain Dedication along with
-//	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>. 
+//	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 package metrics_influxdb;
 
 import java.io.IOException;
@@ -22,22 +22,22 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * A client to send data to a InfluxDB server via HTTP protocol.
- * 
+ *
  * The usage :
- * 
+ *
  * <pre>
  *   Influxdb influxdb = new Influxdb(...);
- * 
+ *
  *   influxdb.appendSeries(...);
  *   ...
  *   influxdb.appendSeries(...);
  *   influxdb.sendRequest();
- *   
+ *
  *   influxdb.appendSeries(...);
  *   ...
  *   influxdb.appendSeries(...);
  *   influxdb.sendRequest();
- * 
+ *
  * </pre>
  */
 public class Influxdb {
@@ -59,7 +59,7 @@ public class Influxdb {
   public final URL url;
   /** true => to print Json on System.err */
   public boolean debugJson = false;
-
+  public JsonBuilder jsonBuilder = new JsonBuilderDefault();
   /**
    * Constructor with the InfluxDB time_precision parameter set to TimeUnit.MILLISECONDS
    * @throws IOException If the URL is malformed
@@ -67,7 +67,7 @@ public class Influxdb {
   public Influxdb(String host, int port, String database, String username, String password) throws Exception  {
     this(host, port, database, username, password, TimeUnit.MILLISECONDS);
   }
-  
+
   /**
    * @param timePrecision The precision of the epoch time that is sent to the server,
    *                      should be TimeUnit.MILLISECONDS unless you are using a custom Clock
@@ -75,18 +75,26 @@ public class Influxdb {
    * @throws IOException If the URL is malformed
    */
   public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception  {
-      this.url = new URL("http", host, port, "/db/" + database + "/series?u=" + URLEncoder.encode(username, UTF_8.name()) + "&p=" + 
+      this.url = new URL("http", host, port, "/db/" + database + "/series?u=" + URLEncoder.encode(username, UTF_8.name()) + "&p=" +
           password + "&time_precision=" + toTimePrecision(timePrecision));
   }
 
   public Influxdb(URL url) throws Exception {
     this.url = url;
   }
+  /**
+  - * Forgot previously appendSeries.
+  - */
+  public void resetRequest() {
+      jsonBuilder.reset();
+  }
 
-  public int sendRequest(String json, boolean throwExc, boolean printJson) throws Exception {
+  public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
+      jsonBuilder.appendSeries(namePrefix, name, nameSuffix, columns, points);
+  }
+  public int sendRequest(boolean throwExc, boolean printJson) throws Exception {
+      String json = jsonBuilder.toJsonString();
 
-    // byte[] content = URLEncoder.encode(json.toString(),
-    // "UTF-8").getBytes(UTF_8);
     if (printJson || debugJson) {
       System.err.println("----");
       System.err.println(json);

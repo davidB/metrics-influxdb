@@ -8,7 +8,7 @@ The library provide a lighter client than influxdb-java to push only metrics.
 ## Dependencies :
 
 * slf4j-api for logging.
-* metrics-core, to provide if you use InfluxdbReporter.
+* metrics-core, to provide, if you use InfluxdbReporter.
 
 ## Usage sample :
 

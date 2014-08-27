@@ -1,4 +1,14 @@
-A reporter for [metrics](http://metrics.codahale.com/) which announces measurements to an [InfluxDB](http://influxdb.org) server.
+The library provide :
+
+* a lighter client than influxdb-java to push only series to an [InfluxDB](http://influxdb.org) server.
+* A reporter for [metrics](http://metrics.codahale.com/) which announces measurements.
+
+The library provide a lighter client than influxdb-java to push only metrics.
+
+## Dependencies :
+
+* slf4j-api for logging.
+* metrics-core, to provide if you use InfluxdbReporter.
 
 ## Usage sample :
 

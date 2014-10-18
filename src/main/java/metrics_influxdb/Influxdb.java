@@ -82,6 +82,14 @@ public class Influxdb {
   public Influxdb(URL url) throws Exception {
     this.url = url;
   }
+
+  /**
+   * Returns true if the pending request has metrics to report and should be sent.
+   */
+  public boolean shouldSendRequest() {
+    return jsonBuilder.hasSeriesData();
+  }
+
   /**
   - * Forgot previously appendSeries.
   - */

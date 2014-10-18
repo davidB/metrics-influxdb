@@ -4,11 +4,18 @@ import java.util.Collection;
 
 class JsonBuilderDefault implements JsonBuilder {
 	private final StringBuilder json = new StringBuilder();
+	private boolean hasSeriesData;
+
+	@Override
+  public boolean hasSeriesData() {
+	  return hasSeriesData;
+	}
 
 	@Override
 	public void reset() {
 		json.setLength(0);
 		json.append('[');
+		hasSeriesData = false;
 	}
 
 	@Override
@@ -21,6 +28,7 @@ class JsonBuilderDefault implements JsonBuilder {
 
 	@Override
 	public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
+	  hasSeriesData = true;
 		if (json.length() > 1)
 			json.append(',');
 		json.append("{\"name\":\"").append(namePrefix).append(name).append(nameSuffix).append("\",\"columns\":[");

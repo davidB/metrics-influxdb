@@ -14,6 +14,7 @@ package metrics_influxdb;
 
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Clock;
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Counting;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
@@ -83,6 +85,7 @@ public class InfluxdbReporter extends ScheduledReporter {
     private TimeUnit rateUnit;
     private TimeUnit durationUnit;
     private MetricFilter filter;
+    private boolean skipIdleMetrics;
 
     private Builder(MetricRegistry registry) {
       this.registry = registry;
@@ -154,6 +157,17 @@ public class InfluxdbReporter extends ScheduledReporter {
     }
 
     /**
+     * Only report metrics that have changed.
+     *
+     * @param skipIdleMetrics
+     * @return {@code this}
+     */
+    public Builder skipIdleMetrics(boolean skipIdleMetrics) {
+      this.skipIdleMetrics = skipIdleMetrics;
+      return this;
+    }
+
+    /**
      * Builds a {@link InfluxdbReporter} with the given properties, sending
      * metrics using the given {@link Influxdb} client.
      *
@@ -168,7 +182,8 @@ public class InfluxdbReporter extends ScheduledReporter {
           prefix,
           rateUnit,
           durationUnit,
-          filter);
+          filter,
+          skipIdleMetrics);
     }
   }
 
@@ -177,6 +192,8 @@ public class InfluxdbReporter extends ScheduledReporter {
   private final Influxdb influxdb;
   private final Clock clock;
   private final String prefix;
+  private final boolean skipIdleMetrics;
+  private final Map<String, Long> previousValues;
 
   // Optimization : use pointsXxx to reduce object creation, by reuse as arg of
   // Influxdb.appendSeries(...)
@@ -233,11 +250,14 @@ public class InfluxdbReporter extends ScheduledReporter {
       String prefix,
       TimeUnit rateUnit,
       TimeUnit durationUnit,
-      MetricFilter filter) {
+      MetricFilter filter,
+      boolean skipIdleMetrics) {
     super(registry, "influxdb-reporter", filter, rateUnit, durationUnit);
     this.influxdb = influxdb;
     this.clock = clock;
     this.prefix = (prefix == null) ? "" : (prefix.trim() + ".");
+    this.skipIdleMetrics = skipIdleMetrics;
+    this.previousValues = new TreeMap<String, Long>();
   }
 
   @Override
@@ -273,13 +293,18 @@ public class InfluxdbReporter extends ScheduledReporter {
         reportTimer(entry.getKey(), entry.getValue(), timestamp);
       }
 
-      influxdb.sendRequest(true, false);
+      if (influxdb.shouldSendRequest()) {
+        influxdb.sendRequest(true, false);
+      }
     } catch (Exception e) {
       LOGGER.warn("Unable to report to InfluxDB. Discarding data.", e);
     }
   }
 
   private void reportTimer(String name, Timer timer, long timestamp) {
+    if (canSkipMetric(name, timer)) {
+      return;
+    }
     final Snapshot snapshot = timer.getSnapshot();
     Object[] p = pointsTimer[0];
     p[0] = timestamp;
@@ -302,6 +327,9 @@ public class InfluxdbReporter extends ScheduledReporter {
   }
 
   private void reportHistogram(String name, Histogram histogram, long timestamp) {
+    if (canSkipMetric(name, histogram)) {
+      return;
+    }
     final Snapshot snapshot = histogram.getSnapshot();
     Object[] p = pointsHistogram[0];
     p[0] = timestamp;
@@ -336,6 +364,9 @@ public class InfluxdbReporter extends ScheduledReporter {
   }
 
   private void reportMeter(String name, Metered meter, long timestamp) {
+    if (canSkipMetric(name, meter)) {
+      return;
+    }
     Object[] p = pointsMeter[0];
     p[0] = timestamp;
     p[1] = meter.getCount();
@@ -373,4 +404,35 @@ public class InfluxdbReporter extends ScheduledReporter {
   // // US-formatted digits
   // return String.format(Locale.US, "%2.2f", v);
   // }
+
+  /**
+   * Returns true if this metric is idle and should be skipped.
+   *
+   * @param name
+   * @param counting
+   * @return true if the metric should be skipped
+   */
+  private boolean canSkipMetric(String name, Counting counting) {
+    boolean isIdle = calculateDelta(name, counting.getCount()) == 0L;
+    if (skipIdleMetrics && !isIdle) {
+      previousValues.put(name, counting.getCount());
+    }
+    return skipIdleMetrics && isIdle;
+  }
+
+  /**
+   * Calculate the delta from the current value to the previous reported value.
+   */
+  private long calculateDelta(String name, long count) {
+    Long previous = previousValues.get(name);
+    if (previous == null) {
+      // unknown metric, force non-zero delta to report
+      return -1L;
+    }
+    if (count < previous) {
+      LOGGER.warn("Saw a non-monotonically increasing value for metric '{}'", name);
+      return 0L;
+    }
+    return count - previous;
+  }
 }

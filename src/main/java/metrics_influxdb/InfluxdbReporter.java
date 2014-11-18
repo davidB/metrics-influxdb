@@ -43,11 +43,13 @@ public class InfluxdbReporter extends ScheduledReporter {
       , "min", "max", "mean", "std-dev"
       , "50-percentile", "75-percentile", "95-percentile", "99-percentile", "999-percentile"
       , "one-minute", "five-minute", "fifteen-minute", "mean-rate"
+      , "run-count"
   };
   private static String[] COLUMNS_HISTOGRAM = {
       "time", "count"
       , "min", "max", "mean", "std-dev"
       , "50-percentile", "75-percentile", "95-percentile", "99-percentile", "999-percentile"
+      , "run-count"
   };
   private static String[] COLUMNS_COUNT = {
       "time", "count"
@@ -195,7 +197,8 @@ public class InfluxdbReporter extends ScheduledReporter {
       0.0d,
       0.0d,
       0.0d,
-      0.0d
+      0.0d,
+      0l
   } };
   private final Object[][] pointsHistogram = { {
       0l,
@@ -208,7 +211,8 @@ public class InfluxdbReporter extends ScheduledReporter {
       0.0d,
       0.0d,
       0.0d,
-      0.0d
+      0.0d,
+      0l
   } };
   private final Object[][] pointsCounter = { {
       0l,
@@ -297,6 +301,7 @@ public class InfluxdbReporter extends ScheduledReporter {
     p[12] = convertRate(timer.getFiveMinuteRate());
     p[13] = convertRate(timer.getFifteenMinuteRate());
     p[14] = convertRate(timer.getMeanRate());
+    p[15] = timer.getCount();
     assert (p.length == COLUMNS_TIMER.length);
     influxdb.appendSeries(prefix, name, ".timer", COLUMNS_TIMER, pointsTimer);
   }
@@ -315,6 +320,7 @@ public class InfluxdbReporter extends ScheduledReporter {
     p[8] = snapshot.get95thPercentile();
     p[9] = snapshot.get99thPercentile();
     p[10] = snapshot.get999thPercentile();
+    p[11] = histogram.getCount();
     assert (p.length == COLUMNS_HISTOGRAM.length);
     influxdb.appendSeries(prefix, name, ".histogram", COLUMNS_HISTOGRAM, pointsHistogram);
   }

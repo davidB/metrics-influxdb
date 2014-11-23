@@ -101,8 +101,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 		/**
 		 * Use the given {@link Clock} instance for the time.
 		 *
-		 * @param clock
-		 *          a {@link Clock} instance
+		 * @param clock a {@link Clock} instance
 		 * @return {@code this}
 		 */
 		public Builder withClock(Clock clock) {
@@ -113,8 +112,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 		/**
 		 * Prefix all metric names with the given string.
 		 *
-		 * @param prefix
-		 *          the prefix for all metric names
+		 * @param prefix the prefix for all metric names
 		 * @return {@code this}
 		 */
 		public Builder prefixedWith(String prefix) {
@@ -125,8 +123,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 		/**
 		 * Convert rates to the given time unit.
 		 *
-		 * @param rateUnit
-		 *          a unit of time
+		 * @param rateUnit a unit of time
 		 * @return {@code this}
 		 */
 		public Builder convertRatesTo(TimeUnit rateUnit) {
@@ -137,8 +134,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 		/**
 		 * Convert durations to the given time unit.
 		 *
-		 * @param durationUnit
-		 *          a unit of time
+		 * @param durationUnit a unit of time
 		 * @return {@code this}
 		 */
 		public Builder convertDurationsTo(TimeUnit durationUnit) {
@@ -149,8 +145,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 		/**
 		 * Only report metrics which match the given filter.
 		 *
-		 * @param filter
-		 *          a {@link MetricFilter}
+		 * @param filter a {@link MetricFilter}
 		 * @return {@code this}
 		 */
 		public Builder filter(MetricFilter filter) {
@@ -173,8 +168,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 		 * Builds a {@link InfluxdbReporter} with the given properties, sending
 		 * metrics using the given {@link Influxdb} client.
 		 *
-		 * @param influxdb
-		 *          a {@link Influxdb} client
+		 * @param influxdb a {@link Influxdb} client
 		 * @return a {@link InfluxdbReporter}
 		 */
 		public InfluxdbReporter build(Influxdb influxdb) {

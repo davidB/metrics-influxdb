@@ -75,8 +75,12 @@ public class Influxdb {
 	 * @throws IOException If the URL is malformed
 	 */
 	public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception  {
-		this.url = new URL("http", host, port, "/db/" + database + "/series?u=" + URLEncoder.encode(username, UTF_8.name()) + "&p=" +
-				password + "&time_precision=" + toTimePrecision(timePrecision));
+		this.url = new URL("http", host, port,
+			"/db/" + database
+			+ "/series?u=" + URLEncoder.encode(username, UTF_8.name())
+			+ "&p=" + password
+			+ "&time_precision=" + toTimePrecision(timePrecision)
+		);
 	}
 
 	public Influxdb(URL url) throws Exception {

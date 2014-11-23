@@ -7,8 +7,8 @@ class JsonBuilderDefault implements JsonBuilder {
 	private boolean hasSeriesData;
 
 	@Override
-  public boolean hasSeriesData() {
-	  return hasSeriesData;
+	public boolean hasSeriesData() {
+		return hasSeriesData;
 	}
 
 	@Override
@@ -28,7 +28,7 @@ class JsonBuilderDefault implements JsonBuilder {
 
 	@Override
 	public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
-	  hasSeriesData = true;
+		hasSeriesData = true;
 		if (json.length() > 1)
 			json.append(',');
 		json.append("{\"name\":\"").append(namePrefix).append(name).append(nameSuffix).append("\",\"columns\":[");

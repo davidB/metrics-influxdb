@@ -41,93 +41,93 @@ import java.util.concurrent.TimeUnit;
  * </pre>
  */
 public class Influxdb {
-  private static final Charset UTF_8 = Charset.forName("UTF-8");
+	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
-  public static String toTimePrecision(TimeUnit t) {
-    switch (t) {
-    case SECONDS:
-      return "s";
-    case MILLISECONDS:
-      return "ms";
-    case MICROSECONDS:
-      return "u";
-    default:
-      throw new IllegalArgumentException("time precision should be SECONDS or MILLISECONDS or MICROSECONDS");
-    }
-  }
+	public static String toTimePrecision(TimeUnit t) {
+		switch (t) {
+		case SECONDS:
+			return "s";
+		case MILLISECONDS:
+			return "ms";
+		case MICROSECONDS:
+			return "u";
+		default:
+			throw new IllegalArgumentException("time precision should be SECONDS or MILLISECONDS or MICROSECONDS");
+		}
+	}
 
-  public final URL url;
-  /** true => to print Json on System.err */
-  public boolean debugJson = false;
-  public JsonBuilder jsonBuilder = new JsonBuilderDefault();
-  /**
-   * Constructor with the InfluxDB time_precision parameter set to TimeUnit.MILLISECONDS
-   * @throws IOException If the URL is malformed
-   */
-  public Influxdb(String host, int port, String database, String username, String password) throws Exception  {
-    this(host, port, database, username, password, TimeUnit.MILLISECONDS);
-  }
+	public final URL url;
+	/** true => to print Json on System.err */
+	public boolean debugJson = false;
+	public JsonBuilder jsonBuilder = new JsonBuilderDefault();
+	/**
+	 * Constructor with the InfluxDB time_precision parameter set to TimeUnit.MILLISECONDS
+	 * @throws IOException If the URL is malformed
+	 */
+	public Influxdb(String host, int port, String database, String username, String password) throws Exception  {
+		this(host, port, database, username, password, TimeUnit.MILLISECONDS);
+	}
 
-  /**
-   * @param timePrecision The precision of the epoch time that is sent to the server,
-   *                      should be TimeUnit.MILLISECONDS unless you are using a custom Clock
-   *                      that does not return milliseconds epoch time for getTime()
-   * @throws IOException If the URL is malformed
-   */
-  public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception  {
-      this.url = new URL("http", host, port, "/db/" + database + "/series?u=" + URLEncoder.encode(username, UTF_8.name()) + "&p=" +
-          password + "&time_precision=" + toTimePrecision(timePrecision));
-  }
+	/**
+	 * @param timePrecision The precision of the epoch time that is sent to the server,
+	 *                      should be TimeUnit.MILLISECONDS unless you are using a custom Clock
+	 *                      that does not return milliseconds epoch time for getTime()
+	 * @throws IOException If the URL is malformed
+	 */
+	public Influxdb(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception  {
+		this.url = new URL("http", host, port, "/db/" + database + "/series?u=" + URLEncoder.encode(username, UTF_8.name()) + "&p=" +
+				password + "&time_precision=" + toTimePrecision(timePrecision));
+	}
 
-  public Influxdb(URL url) throws Exception {
-    this.url = url;
-  }
+	public Influxdb(URL url) throws Exception {
+		this.url = url;
+	}
 
-  /**
-   * Returns true if the pending request has metrics to report and should be sent.
-   */
-  public boolean shouldSendRequest() {
-    return jsonBuilder.hasSeriesData();
-  }
+	/**
+	 * Returns true if the pending request has metrics to report.
+	 */
+	public boolean hasSeriesData() {
+		return jsonBuilder.hasSeriesData();
+	}
 
-  /**
-  - * Forgot previously appendSeries.
-  - */
-  public void resetRequest() {
-      jsonBuilder.reset();
-  }
+	/**
+	 * Forgot previously appendSeries.
+	 */
+	public void resetRequest() {
+		jsonBuilder.reset();
+	}
 
-  public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
-      jsonBuilder.appendSeries(namePrefix, name, nameSuffix, columns, points);
-  }
-  public int sendRequest(boolean throwExc, boolean printJson) throws Exception {
-      String json = jsonBuilder.toJsonString();
+	public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
+		jsonBuilder.appendSeries(namePrefix, name, nameSuffix, columns, points);
+	}
+	public int sendRequest(boolean throwExc, boolean printJson) throws Exception {
+		String json = jsonBuilder.toJsonString();
 
-    if (printJson || debugJson) {
-      System.err.println("----");
-      System.err.println(json);
-      System.err.println("----");
-    }
+		if (printJson || debugJson) {
+			System.err.println("----");
+			System.err.println(json);
+			System.err.println("----");
+		}
 
-    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
-    con.setRequestMethod("POST");
-    // con.setRequestProperty("User-Agent", "InfluxDB-jvm");
+		con.setRequestMethod("POST");
+		// con.setRequestProperty("User-Agent", "InfluxDB-jvm");
 
-    // Send post request
-    con.setDoOutput(true);
-    OutputStream wr = con.getOutputStream();
-    wr.write(json.getBytes(UTF_8));
-    wr.flush();
-    wr.close();
+		// Send post request
+		con.setDoOutput(true);
+		OutputStream wr = con.getOutputStream();
+		wr.write(json.getBytes(UTF_8));
+		wr.flush();
+		wr.close();
 
-    int responseCode = con.getResponseCode();
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      // ignore Response content
-      con.getInputStream().close();
-    } else if (throwExc) {
-      throw new IOException("Server returned HTTP response code: " + responseCode + "for URL: " + url + " with content :'" + con.getResponseMessage() + "'");
-    }
-    return responseCode;
-  }
+		int responseCode = con.getResponseCode();
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			// ignore Response content
+			con.getInputStream().close();
+		} else if (throwExc) {
+			throw new IOException("Server returned HTTP response code: " + responseCode + "for URL: " + url + " with content :'" + con.getResponseMessage() + "'");
+		}
+		return responseCode;
+	}
 }

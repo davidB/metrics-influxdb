@@ -2,6 +2,11 @@ package metrics_influxdb;
 
 interface JsonBuilder {
 
+  /**
+   * Returns true if this builder has series data to send.
+   */
+  public abstract boolean hasSeriesData();
+
 	/**
 	 * Forget previous appendSeries.
 	 */

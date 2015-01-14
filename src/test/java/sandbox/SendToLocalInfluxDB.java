@@ -14,7 +14,7 @@ package sandbox;
 
 import java.util.concurrent.TimeUnit;
 
-import metrics_influxdb.Influxdb;
+import metrics_influxdb.InfluxdbHttp;
 import metrics_influxdb.InfluxdbReporter;
 
 import com.codahale.metrics.ConsoleReporter;
@@ -56,7 +56,7 @@ public class SendToLocalInfluxDB {
   }
 
   private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws Exception {
-    final Influxdb influxdb = new Influxdb("127.0.0.1", 8086, "dev", "u0", "u0PWD");
+    final InfluxdbHttp influxdb = new InfluxdbHttp("127.0.0.1", 8086, "dev", "u0", "u0PWD");
     final InfluxdbReporter reporter = InfluxdbReporter
         .forRegistry(registry)
         .prefixedWith("test")

@@ -12,6 +12,7 @@
 //	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 package metrics_influxdb;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -191,57 +192,6 @@ public class InfluxdbReporter extends ScheduledReporter {
 	private final boolean skipIdleMetrics;
 	private final Map<String, Long> previousValues;
 
-	// Optimization : use pointsXxx to reduce object creation, by reuse as arg of
-	// Influxdb.appendSeries(...)
-	private final Object[][] pointsTimer = { {
-		0l,
-		0,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0l
-	} };
-	private final Object[][] pointsHistogram = { {
-		0l,
-		0,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0l
-	} };
-	private final Object[][] pointsCounter = { {
-		0l,
-		0l
-	} };
-	private final Object[][] pointsGauge = { {
-		0l,
-		null
-	} };
-	private final Object[][] pointsMeter = { {
-		0l,
-		0,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d
-	} };
-
 	private InfluxdbReporter(MetricRegistry registry,
 			Influxdb influxdb,
 			Clock clock,
@@ -303,79 +253,102 @@ public class InfluxdbReporter extends ScheduledReporter {
 		if (canSkipMetric(name, timer)) {
 			return;
 		}
+
 		final Snapshot snapshot = timer.getSnapshot();
-		Object[] p = pointsTimer[0];
-		p[0] = timestamp;
-		p[1] = snapshot.size();
-		p[2] = convertDuration(snapshot.getMin());
-		p[3] = convertDuration(snapshot.getMax());
-		p[4] = convertDuration(snapshot.getMean());
-		p[5] = convertDuration(snapshot.getStdDev());
-		p[6] = convertDuration(snapshot.getMedian());
-		p[7] = convertDuration(snapshot.get75thPercentile());
-		p[8] = convertDuration(snapshot.get95thPercentile());
-		p[9] = convertDuration(snapshot.get99thPercentile());
-		p[10] = convertDuration(snapshot.get999thPercentile());
-		p[11] = convertRate(timer.getOneMinuteRate());
-		p[12] = convertRate(timer.getFiveMinuteRate());
-		p[13] = convertRate(timer.getFifteenMinuteRate());
-		p[14] = convertRate(timer.getMeanRate());
-		p[15] = timer.getCount();
-		assert (p.length == COLUMNS_TIMER.length);
-		influxdb.appendSeries(prefix, name, ".timer", COLUMNS_TIMER, pointsTimer);
+		final SeriesData data = new SeriesData.Builder(influxdb.shouldIncludeTimestamps())
+			.columns(COLUMNS_TIMER)
+			.addPoint(
+				timestamp,
+				snapshot.size(),
+				convertDuration(snapshot.getMin()),
+				convertDuration(snapshot.getMax()),
+				convertDuration(snapshot.getMean()),
+				convertDuration(snapshot.getStdDev()),
+				convertDuration(snapshot.getMedian()),
+				convertDuration(snapshot.get75thPercentile()),
+				convertDuration(snapshot.get95thPercentile()),
+				convertDuration(snapshot.get99thPercentile()),
+				convertDuration(snapshot.get999thPercentile()),
+				convertRate(timer.getOneMinuteRate()),
+				convertRate(timer.getFiveMinuteRate()),
+				convertRate(timer.getFifteenMinuteRate()),
+				convertRate(timer.getMeanRate()),
+				timer.getCount()
+			)
+			.build();
+
+		influxdb.appendSeries(prefix, name, ".timer", data);
 	}
 
 	private void reportHistogram(String name, Histogram histogram, long timestamp) {
 		if (canSkipMetric(name, histogram)) {
 			return;
 		}
+
 		final Snapshot snapshot = histogram.getSnapshot();
-		Object[] p = pointsHistogram[0];
-		p[0] = timestamp;
-		p[1] = snapshot.size();
-		p[2] = snapshot.getMin();
-		p[3] = snapshot.getMax();
-		p[4] = snapshot.getMean();
-		p[5] = snapshot.getStdDev();
-		p[6] = snapshot.getMedian();
-		p[7] = snapshot.get75thPercentile();
-		p[8] = snapshot.get95thPercentile();
-		p[9] = snapshot.get99thPercentile();
-		p[10] = snapshot.get999thPercentile();
-		p[11] = histogram.getCount();
-		assert (p.length == COLUMNS_HISTOGRAM.length);
-		influxdb.appendSeries(prefix, name, ".histogram", COLUMNS_HISTOGRAM, pointsHistogram);
+		final SeriesData data = new SeriesData.Builder(influxdb.shouldIncludeTimestamps())
+			.columns(COLUMNS_HISTOGRAM)
+			.addPoint(
+				timestamp,
+				snapshot.size(),
+				snapshot.getMin(),
+				snapshot.getMax(),
+				snapshot.getMean(),
+				snapshot.getStdDev(),
+				snapshot.getMedian(),
+				snapshot.get75thPercentile(),
+				snapshot.get95thPercentile(),
+				snapshot.get99thPercentile(),
+				snapshot.get999thPercentile(),
+				histogram.getCount()
+			)
+			.build();
+
+		influxdb.appendSeries(prefix, name, ".histogram", data);
 	}
 
 	private void reportCounter(String name, Counter counter, long timestamp) {
-		Object[] p = pointsCounter[0];
-		p[0] = timestamp;
-		p[1] = counter.getCount();
-		assert (p.length == COLUMNS_COUNT.length);
-		influxdb.appendSeries(prefix, name, ".count", COLUMNS_COUNT, pointsCounter);
+		final SeriesData data = new SeriesData.Builder(influxdb.shouldIncludeTimestamps())
+			.columns(COLUMNS_COUNT)
+			.addPoint(
+				timestamp,
+				counter.getCount()
+			)
+			.build();
+
+		influxdb.appendSeries(prefix, name, ".count", data);
 	}
 
 	private void reportGauge(String name, Gauge<?> gauge, long timestamp) {
-		Object[] p = pointsGauge[0];
-		p[0] = timestamp;
-		p[1] = gauge.getValue();
-		assert (p.length == COLUMNS_GAUGE.length);
-		influxdb.appendSeries(prefix, name, ".value", COLUMNS_GAUGE, pointsGauge);
+		final SeriesData data = new SeriesData.Builder(influxdb.shouldIncludeTimestamps())
+			.columns(COLUMNS_GAUGE)
+			.addPoint(
+				timestamp,
+				gauge.getValue()
+			)
+			.build();
+
+		influxdb.appendSeries(prefix, name, ".value", data);
 	}
 
 	private void reportMeter(String name, Metered meter, long timestamp) {
 		if (canSkipMetric(name, meter)) {
 			return;
 		}
-		Object[] p = pointsMeter[0];
-		p[0] = timestamp;
-		p[1] = meter.getCount();
-		p[2] = convertRate(meter.getOneMinuteRate());
-		p[3] = convertRate(meter.getFiveMinuteRate());
-		p[4] = convertRate(meter.getFifteenMinuteRate());
-		p[5] = convertRate(meter.getMeanRate());
-		assert (p.length == COLUMNS_METER.length);
-		influxdb.appendSeries(prefix, name, ".meter", COLUMNS_METER, pointsMeter);
+
+		final SeriesData data = new SeriesData.Builder(influxdb.shouldIncludeTimestamps())
+			.columns(COLUMNS_METER)
+			.addPoint(
+				timestamp,
+				meter.getCount(),
+				convertRate(meter.getOneMinuteRate()),
+				convertRate(meter.getFiveMinuteRate()),
+				convertRate(meter.getFifteenMinuteRate()),
+				convertRate(meter.getMeanRate())
+			)
+			.build();
+
+		influxdb.appendSeries(prefix, name, ".meter", data);
 	}
 
 	// private String format(Object o) {

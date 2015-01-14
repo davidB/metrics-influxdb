@@ -90,6 +90,11 @@ public class InfluxdbHttp implements Influxdb {
 		return jsonBuilder.hasSeriesData();
 	}
 
+	@Override
+	public boolean shouldIncludeTimestamps() {
+		return true;
+	}
+
 	/**
 	 * Forgot previously appendSeries.
 	 */
@@ -97,8 +102,8 @@ public class InfluxdbHttp implements Influxdb {
 		jsonBuilder.reset();
 	}
 
-	public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
-		jsonBuilder.appendSeries(namePrefix, name, nameSuffix, columns, points);
+	public void appendSeries(String namePrefix, String name, String nameSuffix, SeriesData data) {
+		jsonBuilder.appendSeries(namePrefix, name, nameSuffix, data);
 	}
 	public int sendRequest(boolean throwExc, boolean printJson) throws Exception {
 		String json = jsonBuilder.toJsonString();

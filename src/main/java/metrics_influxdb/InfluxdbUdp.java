@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class InfluxdbUdp implements Influxdb {
 	protected final ArrayList<JsonBuilder> jsonBuilders;
@@ -30,9 +31,15 @@ public class InfluxdbUdp implements Influxdb {
 	}
 
 	@Override
-	public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
+	public boolean shouldIncludeTimestamps() {
+		return false;
+	}
+
+	@Override
+	public void appendSeries(String namePrefix, String name, String nameSuffix, SeriesData data) {
 		JsonBuilderDefault jsonBuilder = new JsonBuilderDefault();
-		jsonBuilder.appendSeries(namePrefix, name, nameSuffix, columns, points);
+		jsonBuilder.reset();
+		jsonBuilder.appendSeries(namePrefix, name, nameSuffix, data);
 		jsonBuilders.add(jsonBuilder);
 	}
 
@@ -66,5 +73,24 @@ public class InfluxdbUdp implements Influxdb {
 		}
 
 		return 0;
+	}
+
+	private static void removeColumn(String name, Object[] columns, Object[][] points) {
+		int columnIndex = -1;
+
+		for (int i = 0; i < columns.length; ++i) {
+			if (columns[i].equals(name)) {
+				columnIndex = i;
+				break;
+			}
+		}
+
+		if (columnIndex == -1) {
+			return;
+		}
+
+		ArrayList<Object> cols = new ArrayList<>(Arrays.asList(columns));
+		cols.remove(0);
+		columns = cols.toArray();
 	}
 }

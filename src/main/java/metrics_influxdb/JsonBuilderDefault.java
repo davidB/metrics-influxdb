@@ -28,7 +28,7 @@ class JsonBuilderDefault implements JsonBuilder {
 	}
 
 	@Override
-	public void appendSeries(String namePrefix,String  name,String nameSuffix, SeriesData data) {
+	public void appendSeries(String namePrefix, String  name, String nameSuffix, SeriesData data) {
 		hasSeriesData = true;
 
 		if (json.length() > 1) {

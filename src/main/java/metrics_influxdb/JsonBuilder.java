@@ -25,5 +25,5 @@ interface JsonBuilder {
 	 * @param nameSuffix
 	 * @param data
 	 */
-	public void appendSeries(String namePrefix,String  name,String nameSuffix, SeriesData data);
+	public void appendSeries(String namePrefix, String  name, String nameSuffix, SeriesData data);
 }

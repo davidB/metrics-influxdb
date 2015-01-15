@@ -73,23 +73,4 @@ public class InfluxdbUdp implements Influxdb {
 
 		return 0;
 	}
-
-	private static void removeColumn(String name, Object[] columns, Object[][] points) {
-		int columnIndex = -1;
-
-		for (int i = 0; i < columns.length; ++i) {
-			if (columns[i].equals(name)) {
-				columnIndex = i;
-				break;
-			}
-		}
-
-		if (columnIndex == -1) {
-			return;
-		}
-
-		ArrayList<Object> cols = new ArrayList<>(Arrays.asList(columns));
-		cols.remove(0);
-		columns = cols.toArray();
-	}
 }

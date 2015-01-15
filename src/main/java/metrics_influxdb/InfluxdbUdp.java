@@ -29,6 +29,11 @@ public class InfluxdbUdp implements Influxdb {
 	}
 
 	@Override
+	public long convertTimestamp(long timestamp) {
+		return timestamp / 1000; // when sending timestamps over udp, they must be in seconds https://github.com/influxdb/influxdb/issues/841
+	}
+
+	@Override
 	public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
 		JsonBuilderDefault jsonBuilder = new JsonBuilderDefault();
 		jsonBuilder.reset();

@@ -90,6 +90,11 @@ public class InfluxdbHttp implements Influxdb {
 		return jsonBuilder.hasSeriesData();
 	}
 
+	@Override
+	public long convertTimestamp(long timestamp) {
+		return timestamp;
+	}
+
 	/**
 	 * Forgot previously appendSeries.
 	 */

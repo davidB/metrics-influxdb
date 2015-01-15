@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class InfluxdbUdp implements Influxdb {
 	protected final ArrayList<JsonBuilder> jsonBuilders;
@@ -30,15 +29,9 @@ public class InfluxdbUdp implements Influxdb {
 	}
 
 	@Override
-	public boolean shouldIncludeTimestamps() {
-		return false;
-	}
-
-	@Override
-	public void appendSeries(String namePrefix, String name, String nameSuffix, SeriesData data) {
+	public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
 		JsonBuilderDefault jsonBuilder = new JsonBuilderDefault();
-		jsonBuilder.reset();
-		jsonBuilder.appendSeries(namePrefix, name, nameSuffix, data);
+		jsonBuilder.appendSeries(namePrefix, name, nameSuffix, columns, points);
 		jsonBuilders.add(jsonBuilder);
 	}
 

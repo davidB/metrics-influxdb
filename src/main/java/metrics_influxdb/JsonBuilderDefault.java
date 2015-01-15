@@ -1,6 +1,5 @@
 package metrics_influxdb;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 class JsonBuilderDefault implements JsonBuilder {
@@ -28,37 +27,26 @@ class JsonBuilderDefault implements JsonBuilder {
 	}
 
 	@Override
-	public void appendSeries(String namePrefix, String  name, String nameSuffix, SeriesData data) {
+	public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
 		hasSeriesData = true;
-
-		if (json.length() > 1) {
+		if (json.length() > 1)
 			json.append(',');
-		}
-
 		json.append("{\"name\":\"").append(namePrefix).append(name).append(nameSuffix).append("\",\"columns\":[");
-
-		for (int i = 0; i < data.columns.size(); i++) {
-			if (i > 0) {
+		for (int i = 0; i < columns.length; i++) {
+			if (i > 0)
 				json.append(',');
-			}
-
-			json.append('"').append(data.columns.get(i)).append('"');
+			json.append('"').append(columns[i]).append('"');
 		}
-
 		json.append("],\"points\":[");
-
-		for (int i = 0; i < data.points.size(); i++) {
-			if (i > 0) {
+		for (int i = 0; i < points.length; i++) {
+			if (i > 0)
 				json.append(',');
-			}
-
-			ArrayList<Object> row = data.points.get(i);
+			Object[] row = points[i];
 			json.append('[');
-
-			for (int j = 0; j < row.size(); j++) {
+			for (int j = 0; j < row.length; j++) {
 				if (j > 0)
 					json.append(',');
-				Object value = row.get(j);
+				Object value = row[j];
 				if (value instanceof String) {
 					json.append('"').append(value).append('"');
 				} else if((value instanceof Collection) && ((Collection<?>)value).size()<1) {
@@ -67,10 +55,8 @@ class JsonBuilderDefault implements JsonBuilder {
 					json.append(value);
 				}
 			}
-
 			json.append(']');
 		}
-
 		json.append("]}");
 	}
 

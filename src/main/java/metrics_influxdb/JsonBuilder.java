@@ -23,7 +23,8 @@ interface JsonBuilder {
 	 * @param namePrefix
 	 * @param name
 	 * @param nameSuffix
-	 * @param data
+	 * @param columns
+	 * @param points
 	 */
-	public void appendSeries(String namePrefix, String  name, String nameSuffix, SeriesData data);
+	public abstract void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points);
 }

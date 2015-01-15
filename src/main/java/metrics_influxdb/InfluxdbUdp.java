@@ -31,6 +31,7 @@ public class InfluxdbUdp implements Influxdb {
 	@Override
 	public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
 		JsonBuilderDefault jsonBuilder = new JsonBuilderDefault();
+		jsonBuilder.reset();
 		jsonBuilder.appendSeries(namePrefix, name, nameSuffix, columns, points);
 		jsonBuilders.add(jsonBuilder);
 	}

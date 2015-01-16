@@ -305,7 +305,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 		}
 		final Snapshot snapshot = timer.getSnapshot();
 		Object[] p = pointsTimer[0];
-		p[0] = timestamp;
+		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = snapshot.size();
 		p[2] = convertDuration(snapshot.getMin());
 		p[3] = convertDuration(snapshot.getMax());
@@ -331,7 +331,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 		}
 		final Snapshot snapshot = histogram.getSnapshot();
 		Object[] p = pointsHistogram[0];
-		p[0] = timestamp;
+		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = snapshot.size();
 		p[2] = snapshot.getMin();
 		p[3] = snapshot.getMax();
@@ -349,7 +349,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 
 	private void reportCounter(String name, Counter counter, long timestamp) {
 		Object[] p = pointsCounter[0];
-		p[0] = timestamp;
+		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = counter.getCount();
 		assert (p.length == COLUMNS_COUNT.length);
 		influxdb.appendSeries(prefix, name, ".count", COLUMNS_COUNT, pointsCounter);
@@ -357,7 +357,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 
 	private void reportGauge(String name, Gauge<?> gauge, long timestamp) {
 		Object[] p = pointsGauge[0];
-		p[0] = timestamp;
+		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = gauge.getValue();
 		assert (p.length == COLUMNS_GAUGE.length);
 		influxdb.appendSeries(prefix, name, ".value", COLUMNS_GAUGE, pointsGauge);
@@ -368,7 +368,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 			return;
 		}
 		Object[] p = pointsMeter[0];
-		p[0] = timestamp;
+		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = meter.getCount();
 		p[2] = convertRate(meter.getOneMinuteRate());
 		p[3] = convertRate(meter.getFiveMinuteRate());

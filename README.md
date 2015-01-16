@@ -13,7 +13,8 @@ The library provide a lighter client than influxdb-java to push only metrics.
 ## Usage sample :
 
 	private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws Exception {
-		final Influxdb influxdb = new Influxdb("127.0.0.1", 8086, "mydb", "user", "pass");
+		final InfluxdbHttp influxdb = new InfluxdbHttp("127.0.0.1", 8086, "mydb", "user", "pass"); // http transport
+		// = new InfluxDbUdp("127.0.0.1", 1234); // udp transport
 		//influxdb.debugJson = true; // to print json on System.err
 		//influxdb.jsonBuilder = new MyJsonBuildler(); // to use MyJsonBuilder to create json
 		final InfluxdbReporter reporter = InfluxdbReporter
@@ -22,6 +23,7 @@ The library provide a lighter client than influxdb-java to push only metrics.
 				.convertRatesTo(TimeUnit.SECONDS)
 				.convertDurationsTo(TimeUnit.MILLISECONDS)
 				.filter(MetricFilter.ALL)
+				.skipIdleMetrics(true) // Only report metrics that have changed.
 				.build(influxdb);
 		reporter.start(10, TimeUnit.SECONDS);
 		return reporter;

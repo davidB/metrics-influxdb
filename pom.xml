@@ -9,7 +9,7 @@
 
 	<groupId>net.alchim31</groupId>
 	<artifactId>metrics-influxdb</artifactId>
-	<version>0.5.1-SNAPSHOT</version>
+	<version>0.6.0-SNAPSHOT</version>
 	<name>${project.artifactId}</name>
 	<description>A reporter for metrics which announces measurements to an InfluxDB server.</description>
 	<url>https://github.com/davidB/metrics-influxdb</url>
@@ -35,6 +35,7 @@
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-core</artifactId>
 			<version>3.1.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

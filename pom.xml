@@ -9,6 +9,7 @@
 
 	<groupId>net.alchim31</groupId>
 	<artifactId>metrics-influxdb</artifactId>
+    <packaging>bundle</packaging>
 	<version>0.5.1-SNAPSHOT</version>
 	<name>${project.artifactId}</name>
 	<description>A reporter for metrics which announces measurements to an InfluxDB server.</description>
@@ -77,6 +78,11 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
+            <plugin>
+              <groupId>org.apache.felix</groupId>
+              <artifactId>maven-bundle-plugin</artifactId>
+              <extensions>true</extensions>
+            </plugin>
 		</plugins>
 	</build>
 

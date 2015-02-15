@@ -10,7 +10,7 @@
 	<groupId>net.alchim31</groupId>
 	<artifactId>metrics-influxdb</artifactId>
     <packaging>bundle</packaging>
-	<version>0.6.0</version>
+	<version>0.6.1-SNAPSHOT</version>
 	<name>${project.artifactId}</name>
 	<description>A reporter for metrics which announces measurements to an InfluxDB server.</description>
 	<url>https://github.com/davidB/metrics-influxdb</url>

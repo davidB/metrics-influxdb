@@ -18,6 +18,7 @@ import metrics_influxdb.InfluxdbHttp;
 import metrics_influxdb.InfluxdbReporter;
 
 import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
@@ -32,6 +33,9 @@ public class SendToLocalInfluxDB {
       final MetricRegistry registry = new MetricRegistry();
       r0 = startConsoleReporter(registry);
       r1 = startInfluxdbReporter(registry);
+
+      registerGaugeWithValues(registry, "double", Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 1);
+      registerGaugeWithValues(registry, "float", Float.NaN, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, 1);
 
       final Meter mymeter0 = registry.meter("MyMeter.0");
       for (int i = 0; i < 100; i++) {
@@ -55,8 +59,20 @@ public class SendToLocalInfluxDB {
     }
   }
 
-  private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws Exception {
+  private static void registerGaugeWithValues(MetricRegistry registry, String prefix, Object ...values) {
+    for(final Object value : values) {
+      registry.register(prefix + value, new Gauge<Object>() {
+        @Override
+        public Object getValue() {
+          return value;
+        }
+       });
+    }
+  }
+
+private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws Exception {
     final InfluxdbHttp influxdb = new InfluxdbHttp("127.0.0.1", 8086, "dev", "u0", "u0PWD");
+    //influxdb.debugJson = true;
     final InfluxdbReporter reporter = InfluxdbReporter
         .forRegistry(registry)
         .prefixedWith("test")

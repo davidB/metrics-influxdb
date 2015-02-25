@@ -51,7 +51,16 @@ class JsonBuilderDefault implements JsonBuilder {
 					json.append('"').append(value).append('"');
 				} else if((value instanceof Collection) && ((Collection<?>)value).size()<1) {
 					json.append("null");
-				} else {
+				} 
+				else if (value instanceof Double && !Double.isFinite((double) value))
+				{
+					json.append("null");
+				}
+				else if (value instanceof Float && !Float.isFinite((float) value))
+				{
+					json.append("null");
+				}
+				else {
 					json.append(value);
 				}
 			}

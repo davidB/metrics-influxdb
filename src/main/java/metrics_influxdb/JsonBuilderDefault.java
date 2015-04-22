@@ -52,11 +52,11 @@ class JsonBuilderDefault implements JsonBuilder {
 				} else if((value instanceof Collection) && ((Collection<?>)value).size()<1) {
 					json.append("null");
 				} 
-				else if (value instanceof Double && !Double.isFinite((double) value))
+				else if (value instanceof Double && Double.isInfinite((double) value))
 				{
 					json.append("null");
 				}
-				else if (value instanceof Float && !Float.isFinite((float) value))
+				else if (value instanceof Float && Float.isInfinite((float) value))
 				{
 					json.append("null");
 				}

@@ -65,8 +65,26 @@ public class InfluxdbHttp implements Influxdb {
 	 * @throws IOException If the URL is malformed
 	 */
 	public InfluxdbHttp(String host, int port, String database, String username, String password) throws Exception  {
-		this(host, port, database, username, password, TimeUnit.MILLISECONDS);
+		this(host, port, "", database, username, password, TimeUnit.MILLISECONDS);
 	}
+
+	/**
+     * Constructor with the InfluxDB time_precision parameter set to TimeUnit.MILLISECONDS
+     * @throws IOException If the URL is malformed
+     */
+    public InfluxdbHttp(String host, int port, String path, String database, String username, String password) throws Exception  {
+        this(host, port, path, database, username, password, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * @param timePrecision The precision of the epoch time that is sent to the server,
+     *                      should be TimeUnit.MILLISECONDS unless you are using a custom Clock
+     *                      that does not return milliseconds epoch time for getTime()
+     * @throws IOException If the URL is malformed
+     */
+    public InfluxdbHttp(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception  {
+        this(host, port, "", database, username, password, timePrecision);
+    }
 
 	/**
 	 * @param timePrecision The precision of the epoch time that is sent to the server,
@@ -74,9 +92,9 @@ public class InfluxdbHttp implements Influxdb {
 	 *                      that does not return milliseconds epoch time for getTime()
 	 * @throws IOException If the URL is malformed
 	 */
-	public InfluxdbHttp(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception  {
+	public InfluxdbHttp(String host, int port, String path, String database, String username, String password, TimeUnit timePrecision) throws Exception  {
 		this.url = new URL("http", host, port,
-			"/db/" + database
+			path + "/db/" + database
 			+ "/series?u=" + URLEncoder.encode(username, UTF_8.name())
 			+ "&p=" + password
 			+ "&time_precision=" + toTimePrecision(timePrecision)

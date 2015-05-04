@@ -10,12 +10,20 @@ public class InfluxdbUdp implements Influxdb {
 	private final String host;
 	private final int port;
 	public boolean debugJson = false;
+	private String version;
+	private String database;
 
 	public InfluxdbUdp(String host, int port) {
 		jsonBuilders = new ArrayList<>();
 
 		this.host = host;
 		this.port = port;
+	}
+
+	public InfluxdbUdp(String host, int port, String database, String version) {
+		this(host, port);
+		this.database = database;
+		this.version = version;
 	}
 
 	@Override
@@ -35,7 +43,7 @@ public class InfluxdbUdp implements Influxdb {
 
 	@Override
 	public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
-		JsonBuilderDefault jsonBuilder = new JsonBuilderDefault();
+		JsonBuilder jsonBuilder = getJsonBuilder();
 		jsonBuilder.reset();
 		jsonBuilder.appendSeries(namePrefix, name, nameSuffix, columns, points);
 		jsonBuilders.add(jsonBuilder);
@@ -71,5 +79,12 @@ public class InfluxdbUdp implements Influxdb {
 		}
 
 		return 0;
+	}
+
+	private JsonBuilder getJsonBuilder(){
+		if("0.9".equals(version)){
+			return new JsonBuilderV9(this.database, "");
+		}
+		return  new JsonBuilderDefault();
 	}
 }

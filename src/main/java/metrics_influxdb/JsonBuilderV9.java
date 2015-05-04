@@ -42,9 +42,11 @@ class JsonBuilderV9 implements JsonBuilder {
 		final DateTime timestamp = new DateTime();
 		pointsJson.append("{\"name\":\"").append(namePrefix).append(name).append(nameSuffix).append("\",\"fields\":{");
 		Object[] row = points[0];
+		// Ignore the timestamp, instead set it in the format influxDb expects.
 		for (int j = 1; j < row.length; j++) {
-			if (j > 1)
+			if (j > 1) {
 				pointsJson.append(',');
+			}
 			Object value = row[j];
 			pointsJson.append("\"" + columns[j] + "\":");
 			if (value instanceof String) {
@@ -64,9 +66,6 @@ class JsonBuilderV9 implements JsonBuilder {
 		pointsJson.append("\"timestamp\": \"" + timestamp + "\" }");
 	}
 
-	/* (non-Javadoc)
-	 * @see metrics_influxdb.JsonBuilder#toString()
-	 */
 	@Override
 	public String toString() {
 		return pointsJson.toString();

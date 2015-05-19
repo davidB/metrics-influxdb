@@ -42,3 +42,7 @@ The library provide a lighter client than influxdb-java to push only metrics.
   has waived all copyright and related or neighboring rights to
   this work.
 </p>
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/davidB/metrics-influxdb/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+

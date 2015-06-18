@@ -10,6 +10,7 @@ class JsonBuilderV9 implements JsonBuilder {
 
 	private String metadata;
 
+
 	public JsonBuilderV9(String database, String precision) {
 		metadata = "{\"database\":\"" + database + "\",\"precision\":\"" + precision + "\",";
 	}
@@ -40,7 +41,7 @@ class JsonBuilderV9 implements JsonBuilder {
 			pointsJson.append(',');
 		hasSeriesData = true;
 		final DateTime timestamp = new DateTime();
-		pointsJson.append("{\"name\":\"").append(namePrefix).append(name).append(nameSuffix).append("\",\"fields\":{");
+		pointsJson.append("{\"measurement\":\"").append(namePrefix).append(name).append(nameSuffix).append("\",\"fields\":{");
 		Object[] row = points[0];
 		// Ignore the timestamp, instead set it in the format influxDb expects.
 		for (int j = 1; j < row.length; j++) {

@@ -40,30 +40,6 @@ import com.codahale.metrics.Timer;
  *      time series database with no external dependencies.</a>
  */
 public class InfluxdbReporter extends ScheduledReporter {
-	private static String[] COLUMNS_TIMER = {
-		"time", "count"
-		, "min", "max", "mean", "std-dev"
-		, "50-percentile", "75-percentile", "95-percentile", "99-percentile", "999-percentile"
-		, "one-minute", "five-minute", "fifteen-minute", "mean-rate"
-		, "run-count"
-	};
-	private static String[] COLUMNS_HISTOGRAM = {
-		"time", "count"
-		, "min", "max", "mean", "std-dev"
-		, "50-percentile", "75-percentile", "95-percentile", "99-percentile", "999-percentile"
-		, "run-count"
-	};
-	private static String[] COLUMNS_COUNT = {
-		"time", "count"
-	};
-	private static String[] COLUMNS_GAUGE = {
-		"time", "value"
-	};
-	private static String[] COLUMNS_METER = {
-		"time", "count"
-		, "one-minute", "five-minute", "fifteen-minute", "mean-rate"
-	};
-
 	/**
 	 * Returns a new {@link Builder} for {@link InfluxdbReporter}.
 	 *
@@ -88,6 +64,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 		private TimeUnit durationUnit;
 		private MetricFilter filter;
 		private boolean skipIdleMetrics;
+		private String tag;
 
 		private Builder(MetricRegistry registry) {
 			this.registry = registry;
@@ -96,6 +73,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 			this.rateUnit = TimeUnit.SECONDS;
 			this.durationUnit = TimeUnit.MILLISECONDS;
 			this.filter = MetricFilter.ALL;
+			this.tag = "";
 		}
 
 		/**
@@ -164,6 +142,11 @@ public class InfluxdbReporter extends ScheduledReporter {
 			return this;
 		}
 
+		public Builder withTag(String tag){
+			this.tag = tag;
+			return this;
+		}
+
 		/**
 		 * Builds a {@link InfluxdbReporter} with the given properties, sending
 		 * metrics using the given {@link Influxdb} client.
@@ -179,7 +162,8 @@ public class InfluxdbReporter extends ScheduledReporter {
 					rateUnit,
 					durationUnit,
 					filter,
-					skipIdleMetrics);
+					skipIdleMetrics,
+					tag);
 		}
 	}
 
@@ -190,72 +174,24 @@ public class InfluxdbReporter extends ScheduledReporter {
 	private final String prefix;
 	private final boolean skipIdleMetrics;
 	private final Map<String, Long> previousValues;
-
-	// Optimization : use pointsXxx to reduce object creation, by reuse as arg of
-	// Influxdb.appendSeries(...)
-	private final Object[][] pointsTimer = { {
-		0l,
-		0,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0l
-	} };
-	private final Object[][] pointsHistogram = { {
-		0l,
-		0,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0l
-	} };
-	private final Object[][] pointsCounter = { {
-		0l,
-		0l
-	} };
-	private final Object[][] pointsGauge = { {
-		0l,
-		null
-	} };
-	private final Object[][] pointsMeter = { {
-		0l,
-		0,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d
-	} };
+	private final InfluxdbReporterHelper reporterHelper;
 
 	private InfluxdbReporter(MetricRegistry registry,
-			Influxdb influxdb,
-			Clock clock,
-			String prefix,
-			TimeUnit rateUnit,
-			TimeUnit durationUnit,
-			MetricFilter filter,
-			boolean skipIdleMetrics) {
+							 Influxdb influxdb,
+							 Clock clock,
+							 String prefix,
+							 TimeUnit rateUnit,
+							 TimeUnit durationUnit,
+							 MetricFilter filter,
+							 boolean skipIdleMetrics,
+							 String tag) {
 		super(registry, "influxdb-reporter", filter, rateUnit, durationUnit);
 		this.influxdb = influxdb;
 		this.clock = clock;
 		this.prefix = (prefix == null) ? "" : (prefix.trim() + ".");
 		this.skipIdleMetrics = skipIdleMetrics;
 		this.previousValues = new TreeMap<String, Long>();
+		this.reporterHelper = new InfluxdbReporterHelper(tag);
 	}
 
 	@Override
@@ -304,7 +240,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 			return;
 		}
 		final Snapshot snapshot = timer.getSnapshot();
-		Object[] p = pointsTimer[0];
+		Object[] p = reporterHelper.getPointsTimer()[0];
 		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = snapshot.size();
 		p[2] = convertDuration(snapshot.getMin());
@@ -321,8 +257,8 @@ public class InfluxdbReporter extends ScheduledReporter {
 		p[13] = convertRate(timer.getFifteenMinuteRate());
 		p[14] = convertRate(timer.getMeanRate());
 		p[15] = timer.getCount();
-		assert (p.length == COLUMNS_TIMER.length);
-		influxdb.appendSeries(prefix, name, ".timer", COLUMNS_TIMER, pointsTimer);
+		assert (p.length == reporterHelper.getColumnsTimer().length);
+		influxdb.appendSeries(prefix, name, ".timer", reporterHelper.getColumnsTimer(), reporterHelper.getPointsTimer());
 	}
 
 	private void reportHistogram(String name, Histogram histogram, long timestamp) {
@@ -330,7 +266,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 			return;
 		}
 		final Snapshot snapshot = histogram.getSnapshot();
-		Object[] p = pointsHistogram[0];
+		Object[] p = reporterHelper.getPointsHistogram()[0];
 		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = snapshot.size();
 		p[2] = snapshot.getMin();
@@ -343,39 +279,39 @@ public class InfluxdbReporter extends ScheduledReporter {
 		p[9] = snapshot.get99thPercentile();
 		p[10] = snapshot.get999thPercentile();
 		p[11] = histogram.getCount();
-		assert (p.length == COLUMNS_HISTOGRAM.length);
-		influxdb.appendSeries(prefix, name, ".histogram", COLUMNS_HISTOGRAM, pointsHistogram);
+		assert (p.length == reporterHelper.getColumnsHistogram().length);
+		influxdb.appendSeries(prefix, name, ".histogram", reporterHelper.getColumnsHistogram(), reporterHelper.getPointsHistogram());
 	}
 
 	private void reportCounter(String name, Counter counter, long timestamp) {
-		Object[] p = pointsCounter[0];
+		Object[] p = reporterHelper.getPointsCounter()[0];
 		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = counter.getCount();
-		assert (p.length == COLUMNS_COUNT.length);
-		influxdb.appendSeries(prefix, name, ".count", COLUMNS_COUNT, pointsCounter);
+		assert (p.length == reporterHelper.getColumnsCount().length);
+		influxdb.appendSeries(prefix, name, ".count", reporterHelper.getColumnsCount(), reporterHelper.getPointsCounter());
 	}
 
 	private void reportGauge(String name, Gauge<?> gauge, long timestamp) {
-		Object[] p = pointsGauge[0];
+		Object[] p = reporterHelper.getPointsGauge()[0];
 		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = gauge.getValue();
-		assert (p.length == COLUMNS_GAUGE.length);
-		influxdb.appendSeries(prefix, name, ".value", COLUMNS_GAUGE, pointsGauge);
+		assert (p.length == reporterHelper.getColumnsGauge().length);
+		influxdb.appendSeries(prefix, name, ".value", reporterHelper.getColumnsGauge(), reporterHelper.getPointsGauge());
 	}
 
 	private void reportMeter(String name, Metered meter, long timestamp) {
 		if (canSkipMetric(name, meter)) {
 			return;
 		}
-		Object[] p = pointsMeter[0];
+		Object[] p = reporterHelper.getPointsMeter()[0];
 		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = meter.getCount();
 		p[2] = convertRate(meter.getOneMinuteRate());
 		p[3] = convertRate(meter.getFiveMinuteRate());
 		p[4] = convertRate(meter.getFifteenMinuteRate());
 		p[5] = convertRate(meter.getMeanRate());
-		assert (p.length == COLUMNS_METER.length);
-		influxdb.appendSeries(prefix, name, ".meter", COLUMNS_METER, pointsMeter);
+		assert (p.length == reporterHelper.getColumnsMeter().length);
+		influxdb.appendSeries(prefix, name, ".meter", reporterHelper.getColumnsMeter(), reporterHelper.getPointsMeter());
 	}
 
 	// private String format(Object o) {

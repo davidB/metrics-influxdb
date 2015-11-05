@@ -45,34 +45,29 @@ public class MeasurementReporter extends SkipIdleReporter {
         final long timestamp = clock.getTime();
 
         for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
-            Collection<Measurement> measures = fromGauge(entry.getKey(), entry.getValue(), timestamp);
-            sender.send(measures);
+        	sender.send(fromGauge(entry.getKey(), entry.getValue(), timestamp));
         }
 
         for (Map.Entry<String, Counter> entry : counters.entrySet()) {
-            Collection<Measurement> measures = fromCounter(entry.getKey(), entry.getValue(), timestamp);
-            sender.send(measures);
+        	sender.send(fromCounter(entry.getKey(), entry.getValue(), timestamp));
         }
 
         for (Map.Entry<String, Histogram> entry : histograms.entrySet()) {
-            Collection<Measurement> measures = fromHistogram(entry.getKey(), entry.getValue(), timestamp);
-            sender.send(measures);
+        	sender.send(fromHistogram(entry.getKey(), entry.getValue(), timestamp));
         }
 
         for (Map.Entry<String, Meter> entry : meters.entrySet()) {
-            Collection<Measurement> measures = fromMeter(entry.getKey(), entry.getValue(), timestamp);
-            sender.send(measures);
+        	sender.send(fromMeter(entry.getKey(), entry.getValue(), timestamp));
         }
 
         for (Map.Entry<String, Timer> entry : timers.entrySet()) {
-            Collection<Measurement> measures = fromTimer(entry.getKey(), entry.getValue(), timestamp);
-            sender.send(measures);
+        	sender.send(fromTimer(entry.getKey(), entry.getValue(), timestamp));
         }
 
         sender.flush();
     }
 
-    private Collection<Measurement> fromTimer(String metricName, Timer t, long timestamp) {
+    private Measurement fromTimer(String metricName, Timer t, long timestamp) {
         Snapshot snapshot = t.getSnapshot();
 
         Map<String, String> tags = new HashMap<String, String>(baseTags);
@@ -97,10 +92,10 @@ public class MeasurementReporter extends SkipIdleReporter {
                 .addValue("mean-minute", convertRate(t.getMeanRate()))
                 .addValue("run-count", t.getCount());
         
-        return Collections.singleton(measure);
+        return measure;
     }
 
-    private Collection<Measurement> fromMeter(String metricName, Meter mt, long timestamp) {
+    private Measurement fromMeter(String metricName, Meter mt, long timestamp) {
         Map<String, String> tags = new HashMap<String, String>(baseTags);
         tags.putAll(transformer.getTagsExtractor().apply(metricName));
 
@@ -112,10 +107,10 @@ public class MeasurementReporter extends SkipIdleReporter {
                 .addValue("five-minute", convertRate(mt.getFiveMinuteRate()))
                 .addValue("fifteen-minute", convertRate(mt.getFifteenMinuteRate()))
                 .addValue("mean-minute", convertRate(mt.getMeanRate()));
-        return Collections.singleton(measure);
+        return measure;
     }
 
-    private Collection<Measurement> fromHistogram(String metricName, Histogram h, long timestamp) {
+    private Measurement fromHistogram(String metricName, Histogram h, long timestamp) {
         Snapshot snapshot = h.getSnapshot();
         
         Map<String, String> tags = new HashMap<String, String>(baseTags);
@@ -135,10 +130,10 @@ public class MeasurementReporter extends SkipIdleReporter {
                 .addValue("99-percentile", snapshot.get99thPercentile())
                 .addValue("999-percentile", snapshot.get999thPercentile())
                 .addValue("run-count", h.getCount());
-        return Collections.singleton(measure);
+        return measure;
     }
 
-    private Collection<Measurement> fromCounter(String metricName, Counter c, long timestamp) {
+    private Measurement fromCounter(String metricName, Counter c, long timestamp) {
         Map<String, String> tags = new HashMap<String, String>(baseTags);
         tags.putAll(transformer.getTagsExtractor().apply(metricName));
 
@@ -147,11 +142,11 @@ public class MeasurementReporter extends SkipIdleReporter {
                 .addTag(tags)
                 .addValue("count", c.getCount());
             
-        return Collections.singleton(measure);
+        return measure;
     }
 
     @SuppressWarnings("rawtypes")
-    private Collection<Measurement> fromGauge(String metricName, Gauge g, long timestamp) {
+    private Measurement fromGauge(String metricName, Gauge g, long timestamp) {
         Map<String, String> tags = new HashMap<String, String>(baseTags);
         tags.putAll(transformer.getTagsExtractor().apply(metricName));
 
@@ -170,6 +165,6 @@ public class MeasurementReporter extends SkipIdleReporter {
             measure.addValue("value", value);
         }
         
-        return Collections.singleton(measure);
+        return measure;
     }
 }

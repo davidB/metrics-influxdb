@@ -36,9 +36,11 @@ import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
 import metrics_influxdb.api.protocols.HttpInfluxdbProtocol;
 import metrics_influxdb.api.protocols.InfluxdbProtocol;
 import metrics_influxdb.api.protocols.InfluxdbProtocols;
+import metrics_influxdb.api.protocols.UDPInfluxdbProtocol;
 import metrics_influxdb.measurements.HttpInlinerSender;
 import metrics_influxdb.measurements.MeasurementReporter;
 import metrics_influxdb.measurements.Sender;
+import metrics_influxdb.measurements.UDPInlinerSender;
 import metrics_influxdb.misc.VisibilityIncreasedForTests;
 
 /**
@@ -205,16 +207,19 @@ public class InfluxdbReporter extends SkipIdleReporter {
                 reporter = new InfluxdbReporter(registry, influxdbDelegate, clock, prefix, rateUnit, durationUnit, filter, skipIdleMetrics);
                 break;
             default:
+            	Sender s = null;
                 if (protocol instanceof HttpInfluxdbProtocol) {
-                    Sender s = new HttpInlinerSender((HttpInfluxdbProtocol) protocol);
+                    s = new HttpInlinerSender((HttpInfluxdbProtocol) protocol);
                     // TODO allow registration of default tags
                     // TODO allow registration of transformers
                     // TODO evaluate need of prefix (vs tags)
                     // TODO add UDP protocol
-                    reporter = new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, Collections.emptyMap(), MetricMeasurementTransformer.NOOP);
+                } else if (protocol instanceof UDPInfluxdbProtocol) {
+                	s = new UDPInlinerSender((UDPInfluxdbProtocol) protocol);
                 } else {
                     throw new IllegalStateException("unsupported protocol: " + protocol);
                 }
+                reporter = new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, Collections.emptyMap(), MetricMeasurementTransformer.NOOP);
             }
             return reporter;
         }

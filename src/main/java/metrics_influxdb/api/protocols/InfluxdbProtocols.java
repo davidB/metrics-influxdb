@@ -1,6 +1,10 @@
 package metrics_influxdb.api.protocols;
 
 public class InfluxdbProtocols {
+	public static InfluxdbProtocol udp(String host, int port) {
+		return new UDPInfluxdbProtocol(host, port);
+	}
+	
     public static InfluxdbProtocol http() {
         return new HttpInfluxdbProtocol();
     }

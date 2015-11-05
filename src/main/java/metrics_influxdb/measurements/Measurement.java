@@ -1,4 +1,4 @@
-package metrics_influxdb.serialization.line;
+package metrics_influxdb.measurements;
 
 import java.util.Map;
 

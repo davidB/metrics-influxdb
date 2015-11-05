@@ -17,9 +17,9 @@ import java.util.regex.Pattern;
 import org.junit.Before;
 import org.junit.Test;
 
+import metrics_influxdb.measurements.Measure;
+import metrics_influxdb.measurements.Measurement;
 import metrics_influxdb.serialization.line.Inliner;
-import metrics_influxdb.serialization.line.Measure;
-import metrics_influxdb.serialization.line.Measurement;
 
 public class InlinerTest {
 	private Inliner inliner;

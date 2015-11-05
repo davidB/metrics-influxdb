@@ -1,9 +1,12 @@
-package metrics_influxdb.serialization.line;
+package metrics_influxdb.measurements;
 
-import java.time.Clock;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.codahale.metrics.Clock;
+
+import metrics_influxdb.misc.Miscellaneous;
 
 public class Measure implements Measurement {
 	private String name;
@@ -12,7 +15,7 @@ public class Measure implements Measurement {
 	private long timestamp;
 	
 	public Measure(String name) {
-		this(name, (Map<String, String>)null, (Map<String, String>)null, Clock.systemUTC().millis());
+		this(name, (Map<String, String>)null, (Map<String, String>)null, Clock.defaultClock().getTime());
 	}
 	
 	public Measure(String name, Map<String, String> tags, Map<String, String> values, long timestamp) {
@@ -31,7 +34,7 @@ public class Measure implements Measurement {
 	}
 	
 	public Measure(String name, Map<String, String> tags, long value) {
-		this(name, tags, value, Clock.systemUTC().millis());
+		this(name, tags, value, Clock.defaultClock().getTime());
 	}
 	
 	public Measure(String name, Map<String, String> tags, long value, long timestamp) {
@@ -43,11 +46,11 @@ public class Measure implements Measurement {
 	}
 	
 	public Measure(String name, long value) {
-		this(name, value, Clock.systemUTC().millis());
+		this(name, value, Clock.defaultClock().getTime());
 	}
 
 	public Measure(String name, Map<String, String> tags, int value) {
-		this(name, tags, Long.valueOf(value), Clock.systemUTC().millis());
+		this(name, tags, Long.valueOf(value), Clock.defaultClock().getTime());
 	}
 	
 	public Measure(String name, Map<String, String> tags, int value, long timestamp) {
@@ -59,11 +62,11 @@ public class Measure implements Measurement {
 	}
 	
 	public Measure(String name, int value) {
-		this(name, Long.valueOf(value), Clock.systemUTC().millis());
+		this(name, Long.valueOf(value), Clock.defaultClock().getTime());
 	}
 
 	public Measure(String name, Map<String, String> tags, double value) {
-		this(name, tags, value, Clock.systemUTC().millis());
+		this(name, tags, value, Clock.defaultClock().getTime());
 	}
 	
 	public Measure(String name, Map<String, String> tags, double value, long timestamp) {
@@ -75,11 +78,11 @@ public class Measure implements Measurement {
 	}
 	
 	public Measure(String name, double value) {
-		this(name, value, Clock.systemUTC().millis());
+		this(name, value, Clock.defaultClock().getTime());
 	}	
 
 	public Measure(String name, Map<String, String> tags, float value) {
-		this(name, tags, Double.valueOf(value), Clock.systemUTC().millis());
+		this(name, tags, Double.valueOf(value), Clock.defaultClock().getTime());
 	}
 	
 	public Measure(String name, Map<String, String> tags, float value, long timestamp) {
@@ -91,11 +94,11 @@ public class Measure implements Measurement {
 	}
 	
 	public Measure(String name, float value) {
-		this(name, Double.valueOf(value), Clock.systemUTC().millis());
+		this(name, Double.valueOf(value), Clock.defaultClock().getTime());
 	}	
 	
 	public Measure(String name, Map<String, String> tags, String value) {
-		this(name, tags, value, Clock.systemUTC().millis());
+		this(name, tags, value, Clock.defaultClock().getTime());
 	}
 	
 	public Measure(String name, Map<String, String> tags, String value, long timestamp) {
@@ -107,11 +110,11 @@ public class Measure implements Measurement {
 	}
 	
 	public Measure(String name, String value) {
-		this(name, value, Clock.systemUTC().millis());
+		this(name, value, Clock.defaultClock().getTime());
 	}
 
 	public Measure(String name, Map<String, String> tags, boolean value) {
-		this(name, tags, value, Clock.systemUTC().millis());
+		this(name, tags, value, Clock.defaultClock().getTime());
 	}
 	
 	public Measure(String name, Map<String, String> tags, boolean value, long timestamp) {
@@ -123,11 +126,11 @@ public class Measure implements Measurement {
 	}
 	
 	public Measure(String name, boolean value) {
-		this(name, value, Clock.systemUTC().millis());
+		this(name, value, Clock.defaultClock().getTime());
 	}
 	
 	private static String asStringValue(String value) {
-		return "\"" + StringEscape.escape(value, '"') + "\"";
+		return "\"" + Miscellaneous.escape(value, '"') + "\"";
 	}
 
 	@Override
@@ -172,9 +175,18 @@ public class Measure implements Measurement {
 		this.timestamp = timestamp;
 	}
 	
+	public Measure timestamp(long timestamp) {
+	    setTimestamp(timestamp);
+	    return this;
+	}
+	
 	public Measure addTag(String tagKey, String tagValue) {
 		tags.put(tagKey, tagValue);
 		return this;
+	}
+	public Measure addTag(Map<String, String> tags) {
+	    this.tags.putAll(tags);
+	    return this;
 	}
 	public Measure addValue(String key, String value) {
 		values.put(key, asStringValue(value));

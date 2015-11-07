@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.hamcrest.collection.IsMapContaining.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,5 +72,22 @@ public class InfluxdbReporterBuilderTest {
                     .build();
         
         assertThat(reporter, notNullValue());
+    }
+    
+    @Test
+    public void builder_api_with_tags() {
+    	String tagKey = "tag-name";
+		String tagValue = "tag-value";
+		
+		Builder builder = InfluxdbReporter
+		.forRegistry(registry)
+		.tag(tagKey, tagValue)
+		.protocol(InfluxdbProtocols.http());
+    	
+    	assertThat(builder.tags, notNullValue());
+    	assertThat(builder.tags, hasEntry(tagKey, tagValue));
+    	
+		ScheduledReporter reporter = builder.build();
+    	assertThat(reporter, notNullValue());
     }
 }

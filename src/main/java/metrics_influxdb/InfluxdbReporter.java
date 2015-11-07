@@ -102,6 +102,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
         @VisibilityIncreasedForTests InfluxDBCompatibilityVersions influxdbVersion;
         @VisibilityIncreasedForTests InfluxdbProtocol protocol;
         @VisibilityIncreasedForTests Influxdb influxdbDelegate;
+		@VisibilityIncreasedForTests Map<String, String> tags;
 
 		private Builder(MetricRegistry registry) {
 			this.registry = registry;
@@ -210,16 +211,14 @@ public class InfluxdbReporter extends SkipIdleReporter {
             	Sender s = null;
                 if (protocol instanceof HttpInfluxdbProtocol) {
                     s = new HttpInlinerSender((HttpInfluxdbProtocol) protocol);
-                    // TODO allow registration of default tags
                     // TODO allow registration of transformers
                     // TODO evaluate need of prefix (vs tags)
-                    // TODO add UDP protocol
                 } else if (protocol instanceof UDPInfluxdbProtocol) {
                 	s = new UDPInlinerSender((UDPInfluxdbProtocol) protocol);
                 } else {
                     throw new IllegalStateException("unsupported protocol: " + protocol);
                 }
-                reporter = new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, Collections.emptyMap(), MetricMeasurementTransformer.NOOP);
+                reporter = new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, tags, MetricMeasurementTransformer.NOOP);
             }
             return reporter;
         }
@@ -234,6 +233,11 @@ public class InfluxdbReporter extends SkipIdleReporter {
             this.protocol = protocol;
             return this;
         }
+
+		public Builder tag(String tagKey, String tagValue) {
+			tags.put(tagKey, tagValue);
+			return this;
+		}
 	}
 
 	static final Logger LOGGER = LoggerFactory.getLogger(InfluxdbReporter.class);

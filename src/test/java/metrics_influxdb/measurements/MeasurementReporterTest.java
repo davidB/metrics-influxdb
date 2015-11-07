@@ -157,24 +157,4 @@ public class MeasurementReporterTest {
         assertThat(sender.getFrames().get(0), containsString("999-percentile="));
         assertThat(sender.getFrames().get(0), containsString("run-count="));
     }
-    
-    private class ListInlinerSender extends QueueableSender {
-        private Inliner inliner;
-        private List<String> frames;
-
-        private ListInlinerSender(int queueSize) {
-            super(queueSize);
-            inliner = new Inliner();
-            frames = new LinkedList<>();
-        }
-        
-        @Override
-        protected boolean doSend(Collection<Measurement> measuresToSend) {
-            return frames.add(inliner.inline(measuresToSend));
-        }
-
-        public List<String> getFrames() {
-            return frames;
-        }
-    }
 }

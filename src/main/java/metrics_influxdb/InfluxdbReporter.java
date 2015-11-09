@@ -12,8 +12,9 @@
 //	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 package metrics_influxdb;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +42,7 @@ import metrics_influxdb.measurements.HttpInlinerSender;
 import metrics_influxdb.measurements.MeasurementReporter;
 import metrics_influxdb.measurements.Sender;
 import metrics_influxdb.measurements.UDPInlinerSender;
+import metrics_influxdb.misc.Miscellaneous;
 import metrics_influxdb.misc.VisibilityIncreasedForTests;
 
 /**
@@ -103,6 +105,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
         @VisibilityIncreasedForTests InfluxdbProtocol protocol;
         @VisibilityIncreasedForTests Influxdb influxdbDelegate;
 		@VisibilityIncreasedForTests Map<String, String> tags;
+		@VisibilityIncreasedForTests MetricMeasurementTransformer transformer = MetricMeasurementTransformer.NOOP;
 
 		private Builder(MetricRegistry registry) {
 			this.registry = registry;
@@ -113,6 +116,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
 			this.filter = MetricFilter.ALL;
 			this.protocol = InfluxdbProtocols.http();
 			this.influxdbVersion = InfluxDBCompatibilityVersions.LATEST;
+			this.tags = new HashMap<>();
 		}
 
 		/**
@@ -218,23 +222,53 @@ public class InfluxdbReporter extends SkipIdleReporter {
                 } else {
                     throw new IllegalStateException("unsupported protocol: " + protocol);
                 }
-                reporter = new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, tags, MetricMeasurementTransformer.NOOP);
+                reporter = new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, tags, transformer);
             }
             return reporter;
         }
 
+        /**
+         * Operates with influxdb version <= 08. 
+         * @param delegate the influxdb delegate to use, cannot be null
+         * @return the builder itself
+         */
         public Builder v08(Influxdb delegate) {
+            Objects.requireNonNull(delegate, "given Influxdb cannot be null");
             this.influxdbVersion  = InfluxDBCompatibilityVersions.V08;
             this.influxdbDelegate = delegate;
             return this;
         }
 
+        /**
+         * Override the protocol to use.
+         * @param protocol a non null protocol
+         * @return
+         */
         public Builder protocol(InfluxdbProtocol protocol) {
+            Objects.requireNonNull(protocol, "given InfluxdbProtocol cannot be null");
             this.protocol = protocol;
             return this;
         }
 
+        /**
+         * Sets the metric2measurement transformer to be used.
+         * @param transformer a non null transformer
+         * @return
+         */
+        public Builder transformer(MetricMeasurementTransformer transformer) {
+            Objects.requireNonNull(transformer, "given MetricMeasurementTransformer cannot be null");
+            this.transformer = transformer;
+            return this;
+        }
+
+        /**
+         * Registers the given key/value as a default tag for the generated measurements.
+         * @param tagKey the key to register, cannot be null or empty
+         * @param tagValue the value to register against the given key, cannot be null or empty
+         */
 		public Builder tag(String tagKey, String tagValue) {
+            Miscellaneous.requireNotEmptyParameter(tagKey, "tag");
+            Miscellaneous.requireNotEmptyParameter(tagValue, "value");
 			tags.put(tagKey, tagValue);
 			return this;
 		}

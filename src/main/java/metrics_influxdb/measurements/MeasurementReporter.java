@@ -1,7 +1,5 @@
 package metrics_influxdb.measurements;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -71,9 +69,9 @@ public class MeasurementReporter extends SkipIdleReporter {
         Snapshot snapshot = t.getSnapshot();
 
         Map<String, String> tags = new HashMap<String, String>(baseTags);
-        tags.putAll(transformer.getTagsExtractor().apply(metricName));
+        tags.putAll(transformer.tags(metricName));
 
-        Measure measure = new Measure(transformer.getMeasurementNamer().apply(metricName))
+        Measure measure = new Measure(transformer.measurementName(metricName))
                 .timestamp(timestamp)
                 .addTag(tags)
                 .addValue("count", snapshot.size())
@@ -97,9 +95,9 @@ public class MeasurementReporter extends SkipIdleReporter {
 
     private Measurement fromMeter(String metricName, Meter mt, long timestamp) {
         Map<String, String> tags = new HashMap<String, String>(baseTags);
-        tags.putAll(transformer.getTagsExtractor().apply(metricName));
+        tags.putAll(transformer.tags(metricName));
 
-        Measure measure = new Measure(transformer.getMeasurementNamer().apply(metricName))
+        Measure measure = new Measure(transformer.measurementName(metricName))
                 .timestamp(timestamp)
                 .addTag(tags)
                 .addValue("count", mt.getCount())
@@ -114,9 +112,9 @@ public class MeasurementReporter extends SkipIdleReporter {
         Snapshot snapshot = h.getSnapshot();
         
         Map<String, String> tags = new HashMap<String, String>(baseTags);
-        tags.putAll(transformer.getTagsExtractor().apply(metricName));
+        tags.putAll(transformer.tags(metricName));
 
-        Measure measure = new Measure(transformer.getMeasurementNamer().apply(metricName))
+        Measure measure = new Measure(transformer.measurementName(metricName))
                 .timestamp(timestamp)
                 .addTag(tags)
                 .addValue("count", snapshot.size())
@@ -135,9 +133,9 @@ public class MeasurementReporter extends SkipIdleReporter {
 
     private Measurement fromCounter(String metricName, Counter c, long timestamp) {
         Map<String, String> tags = new HashMap<String, String>(baseTags);
-        tags.putAll(transformer.getTagsExtractor().apply(metricName));
+        tags.putAll(transformer.tags(metricName));
 
-        Measure measure = new Measure(transformer.getMeasurementNamer().apply(metricName))
+        Measure measure = new Measure(transformer.measurementName(metricName))
                 .timestamp(timestamp)
                 .addTag(tags)
                 .addValue("count", c.getCount());
@@ -148,9 +146,9 @@ public class MeasurementReporter extends SkipIdleReporter {
     @SuppressWarnings("rawtypes")
     private Measurement fromGauge(String metricName, Gauge g, long timestamp) {
         Map<String, String> tags = new HashMap<String, String>(baseTags);
-        tags.putAll(transformer.getTagsExtractor().apply(metricName));
+        tags.putAll(transformer.tags(metricName));
 
-        Measure measure = new Measure(transformer.getMeasurementNamer().apply(metricName))
+        Measure measure = new Measure(transformer.measurementName(metricName))
                 .timestamp(timestamp)
                 .addTag(tags);
         Object o = g.getValue();

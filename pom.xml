@@ -7,9 +7,9 @@
 		<version>7</version>
 	</parent>
 
-	<groupId>net.alchim31</groupId>
+	<groupId>com.github.davidb</groupId>
 	<artifactId>metrics-influxdb</artifactId>
-    <packaging>bundle</packaging>
+	<packaging>bundle</packaging>
 	<version>0.8.0-SNAPSHOT</version>
 	<name>${project.artifactId}</name>
 	<description>A reporter for metrics which announces measurements to an InfluxDB server.</description>
@@ -67,10 +67,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.hamcrest</groupId>
-		    <artifactId>hamcrest-library</artifactId>
-		    <version>1.3</version>
-		    <scope>test</scope>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<version>1.3</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.easytesting</groupId>

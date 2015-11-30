@@ -27,6 +27,15 @@ The library provide a lighter client than influxdb-java to push only metrics.
 * slf4j-api for logging.
 * metrics-core, to provide, if you use InfluxdbReporter.
 
+## Install:
+```
+ repositories {
+        maven { url "https://jitpack.io" }
+ }
+ dependencies {
+	        compile 'com.github.davidb:metrics-influxdb:-SNAPSHOT'
+ }
+```
 ## Usage :
 
 Using the Builder API and its defaults, it is easy to use InfluxdbReporter:

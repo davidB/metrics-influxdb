@@ -12,9 +12,10 @@
 //	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 package metrics_influxdb;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -22,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Clock;
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Counting;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
@@ -33,13 +33,25 @@ import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 
+import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
+import metrics_influxdb.api.protocols.HttpInfluxdbProtocol;
+import metrics_influxdb.api.protocols.InfluxdbProtocol;
+import metrics_influxdb.api.protocols.InfluxdbProtocols;
+import metrics_influxdb.api.protocols.UDPInfluxdbProtocol;
+import metrics_influxdb.measurements.HttpInlinerSender;
+import metrics_influxdb.measurements.MeasurementReporter;
+import metrics_influxdb.measurements.Sender;
+import metrics_influxdb.measurements.UDPInlinerSender;
+import metrics_influxdb.misc.Miscellaneous;
+import metrics_influxdb.misc.VisibilityIncreasedForTests;
+
 /**
  * A reporter which publishes metric values to a InfluxDB server.
  *
  * @see <a href="http://influxdb.org/">InfluxDB - An open-source distributed
  *      time series database with no external dependencies.</a>
  */
-public class InfluxdbReporter extends ScheduledReporter {
+public class InfluxdbReporter extends SkipIdleReporter {
 	private static String[] COLUMNS_TIMER = {
 		"time", "count"
 		, "min", "max", "mean", "std-dev"
@@ -88,6 +100,12 @@ public class InfluxdbReporter extends ScheduledReporter {
 		private TimeUnit durationUnit;
 		private MetricFilter filter;
 		private boolean skipIdleMetrics;
+		
+        @VisibilityIncreasedForTests InfluxDBCompatibilityVersions influxdbVersion;
+        @VisibilityIncreasedForTests InfluxdbProtocol protocol;
+        @VisibilityIncreasedForTests Influxdb influxdbDelegate;
+		@VisibilityIncreasedForTests Map<String, String> tags;
+		@VisibilityIncreasedForTests MetricMeasurementTransformer transformer = MetricMeasurementTransformer.NOOP;
 
 		private Builder(MetricRegistry registry) {
 			this.registry = registry;
@@ -96,6 +114,9 @@ public class InfluxdbReporter extends ScheduledReporter {
 			this.rateUnit = TimeUnit.SECONDS;
 			this.durationUnit = TimeUnit.MILLISECONDS;
 			this.filter = MetricFilter.ALL;
+			this.protocol = InfluxdbProtocols.http();
+			this.influxdbVersion = InfluxDBCompatibilityVersions.LATEST;
+			this.tags = new HashMap<>();
 		}
 
 		/**
@@ -170,6 +191,7 @@ public class InfluxdbReporter extends ScheduledReporter {
 		 *
 		 * @param influxdb a {@link Influxdb} client
 		 * @return a {@link InfluxdbReporter}
+		 * @deprecated in 0.7.0 and above, use {@link #v08(Influxdb)} and {@link #build()} instead
 		 */
 		public InfluxdbReporter build(Influxdb influxdb) {
 			return new InfluxdbReporter(registry,
@@ -181,16 +203,82 @@ public class InfluxdbReporter extends ScheduledReporter {
 					filter,
 					skipIdleMetrics);
 		}
+
+        public ScheduledReporter build() {
+            ScheduledReporter reporter;
+            
+            switch (influxdbVersion) {
+            case V08:
+                reporter = new InfluxdbReporter(registry, influxdbDelegate, clock, prefix, rateUnit, durationUnit, filter, skipIdleMetrics);
+                break;
+            default:
+            	Sender s = null;
+                if (protocol instanceof HttpInfluxdbProtocol) {
+                    s = new HttpInlinerSender((HttpInfluxdbProtocol) protocol);
+                    // TODO allow registration of transformers
+                    // TODO evaluate need of prefix (vs tags)
+                } else if (protocol instanceof UDPInfluxdbProtocol) {
+                	s = new UDPInlinerSender((UDPInfluxdbProtocol) protocol);
+                } else {
+                    throw new IllegalStateException("unsupported protocol: " + protocol);
+                }
+                reporter = new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, tags, transformer);
+            }
+            return reporter;
+        }
+
+        /**
+         * Operates with influxdb version <= 08. 
+         * @param delegate the influxdb delegate to use, cannot be null
+         * @return the builder itself
+         */
+        public Builder v08(Influxdb delegate) {
+            Objects.requireNonNull(delegate, "given Influxdb cannot be null");
+            this.influxdbVersion  = InfluxDBCompatibilityVersions.V08;
+            this.influxdbDelegate = delegate;
+            return this;
+        }
+
+        /**
+         * Override the protocol to use.
+         * @param protocol a non null protocol
+         * @return
+         */
+        public Builder protocol(InfluxdbProtocol protocol) {
+            Objects.requireNonNull(protocol, "given InfluxdbProtocol cannot be null");
+            this.protocol = protocol;
+            return this;
+        }
+
+        /**
+         * Sets the metric2measurement transformer to be used.
+         * @param transformer a non null transformer
+         * @return
+         */
+        public Builder transformer(MetricMeasurementTransformer transformer) {
+            Objects.requireNonNull(transformer, "given MetricMeasurementTransformer cannot be null");
+            this.transformer = transformer;
+            return this;
+        }
+
+        /**
+         * Registers the given key/value as a default tag for the generated measurements.
+         * @param tagKey the key to register, cannot be null or empty
+         * @param tagValue the value to register against the given key, cannot be null or empty
+         */
+		public Builder tag(String tagKey, String tagValue) {
+            Miscellaneous.requireNotEmptyParameter(tagKey, "tag");
+            Miscellaneous.requireNotEmptyParameter(tagValue, "value");
+			tags.put(tagKey, tagValue);
+			return this;
+		}
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(InfluxdbReporter.class);
+	static final Logger LOGGER = LoggerFactory.getLogger(InfluxdbReporter.class);
 
 	private final Influxdb influxdb;
 	private final Clock clock;
 	private final String prefix;
-	private final boolean skipIdleMetrics;
-	private final Map<String, Long> previousValues;
-
 	// Optimization : use pointsXxx to reduce object creation, by reuse as arg of
 	// Influxdb.appendSeries(...)
 	private final Object[][] pointsTimer = { {
@@ -250,15 +338,21 @@ public class InfluxdbReporter extends ScheduledReporter {
 			TimeUnit durationUnit,
 			MetricFilter filter,
 			boolean skipIdleMetrics) {
-		super(registry, "influxdb-reporter", filter, rateUnit, durationUnit);
+		super(registry, "influxdb-reporter", filter, rateUnit, durationUnit, skipIdleMetrics);
 		this.influxdb = influxdb;
 		this.clock = clock;
 		this.prefix = (prefix == null) ? "" : (prefix.trim() + ".");
-		this.skipIdleMetrics = skipIdleMetrics;
-		this.previousValues = new TreeMap<String, Long>();
 	}
 
-	@Override
+	private InfluxdbReporter(MetricRegistry registry, MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit) {
+	    super(registry, "influxdb-reporter", filter, rateUnit, durationUnit, true);
+	    
+        this.influxdb = null;
+        this.clock = null;
+        this.prefix = "";
+    }
+
+    @Override
 	@SuppressWarnings("rawtypes")
 	public void report(SortedMap<String, Gauge> gauges,
 			SortedMap<String, Counter> counters,
@@ -376,63 +470,5 @@ public class InfluxdbReporter extends ScheduledReporter {
 		p[5] = convertRate(meter.getMeanRate());
 		assert (p.length == COLUMNS_METER.length);
 		influxdb.appendSeries(prefix, name, ".meter", COLUMNS_METER, pointsMeter);
-	}
-
-	// private String format(Object o) {
-	// if (o instanceof Float) {
-	// return format(((Float) o).doubleValue());
-	// } else if (o instanceof Double) {
-	// return format(((Double) o).doubleValue());
-	// } else if (o instanceof Byte) {
-	// return format(((Byte) o).longValue());
-	// } else if (o instanceof Short) {
-	// return format(((Short) o).longValue());
-	// } else if (o instanceof Integer) {
-	// return format(((Integer) o).longValue());
-	// } else if (o instanceof Long) {
-	// return format(((Long) o).longValue());
-	// }
-	// return null;
-	// }
-	// private String format(long n) {
-	// return Long.toString(n);
-	// }
-	//
-	// private String format(double v) {
-	// // the Carbon plaintext format is pretty underspecified, but it seems like
-	// it just wants
-	// // US-formatted digits
-	// return String.format(Locale.US, "%2.2f", v);
-	// }
-
-	/**
-	 * Returns true if this metric is idle and should be skipped.
-	 *
-	 * @param name
-	 * @param counting
-	 * @return true if the metric should be skipped
-	 */
-	private boolean canSkipMetric(String name, Counting counting) {
-		boolean isIdle = calculateDelta(name, counting.getCount()) == 0L;
-		if (skipIdleMetrics && !isIdle) {
-			previousValues.put(name, counting.getCount());
-		}
-		return skipIdleMetrics && isIdle;
-	}
-
-	/**
-	 * Calculate the delta from the current value to the previous reported value.
-	 */
-	private long calculateDelta(String name, long count) {
-		Long previous = previousValues.get(name);
-		if (previous == null) {
-			// unknown metric, force non-zero delta to report
-			return -1L;
-		}
-		if (count < previous) {
-			LOGGER.warn("Saw a non-monotonically increasing value for metric '{}'", name);
-			return 0L;
-		}
-		return count - previous;
 	}
 }

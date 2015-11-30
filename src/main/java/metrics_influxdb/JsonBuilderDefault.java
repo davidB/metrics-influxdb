@@ -51,7 +51,7 @@ class JsonBuilderDefault implements JsonBuilder {
 					json.append('"').append(value).append('"');
 				} else if((value instanceof Collection) && ((Collection<?>)value).size()<1) {
 					json.append("null");
-				} 
+				}
 				else if (value instanceof Double && Double.isInfinite((double) value))
 				{
 					json.append("null");

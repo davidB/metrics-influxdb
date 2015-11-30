@@ -102,6 +102,20 @@ public class InfluxdbHttp implements Influxdb {
 	}
 
 	/**
+	 * @param version the Influxdb version, currently builds a different url for 0.9 versions, else defaults to the earlier url
+	 * @throws Exception
+	 */
+	public InfluxdbHttp(String host, int port, String database, String username, String password, TimeUnit timePrecision, String version) throws Exception  {
+		if("0.9".equals(version)){
+			this.url = new URL("http", host, port,
+					"/write?u=" + username + "&p=" + password);
+			this.jsonBuilder = new JsonBuilderV9(database, toTimePrecision(timePrecision));
+		} else {
+			throw new IllegalArgumentException("Unsupported InfluxDb version.");
+		}
+	}
+
+	/**
 	 * Returns true if the pending request has metrics to report.
 	 */
 	public boolean hasSeriesData() {
@@ -123,6 +137,7 @@ public class InfluxdbHttp implements Influxdb {
 	public void appendSeries(String namePrefix, String name, String nameSuffix, String[] columns, Object[][] points) {
 		jsonBuilder.appendSeries(namePrefix, name, nameSuffix, columns, points);
 	}
+
 	public int sendRequest(boolean throwExc, boolean printJson) throws Exception {
 		String json = jsonBuilder.toJsonString();
 

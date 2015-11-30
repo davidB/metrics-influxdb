@@ -12,6 +12,7 @@
 //	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>. 
 package sandbox;
 
+import com.codahale.metrics.Timer;
 import java.util.concurrent.TimeUnit;
 
 import metrics_influxdb.InfluxdbHttp;
@@ -32,6 +33,7 @@ public class SendToLocalInfluxDB {
     try {
       final MetricRegistry registry = new MetricRegistry();
       r0 = startConsoleReporter(registry);
+//	  r1 = startInfluxdbV9Reporter(registry);
       r1 = startInfluxdbReporter(registry);
 
       registerGaugeWithValues(registry, "double", Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 1);
@@ -91,6 +93,19 @@ private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) t
         .convertDurationsTo(TimeUnit.MILLISECONDS)
         .build();
     reporter.start(1, TimeUnit.MINUTES);
+		return reporter;
+	}
+
+	private static InfluxdbReporter startInfluxdbV9Reporter(MetricRegistry registry) throws Exception {
+		final InfluxdbHttp influxdb = new InfluxdbHttp("127.0.0.1", 8086, "graphite", "root", "root",TimeUnit.MILLISECONDS, "0.9");
+		final InfluxdbReporter reporter = InfluxdbReporter
+				.forRegistry(registry)
+				.prefixedWith("test")
+				.convertRatesTo(TimeUnit.SECONDS)
+				.convertDurationsTo(TimeUnit.MILLISECONDS)
+				.filter(MetricFilter.ALL)
+				.build(influxdb);
+		reporter.start(10, TimeUnit.SECONDS);
     return reporter;
   }
 }

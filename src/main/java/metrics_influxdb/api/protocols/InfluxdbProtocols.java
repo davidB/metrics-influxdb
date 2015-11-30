@@ -17,6 +17,10 @@ public class InfluxdbProtocols {
         return new HttpInfluxdbProtocol(host, port);
     }
     
+    public static InfluxdbProtocol http(String host, int port, String database) {
+        return new HttpInfluxdbProtocol(host, port, database);
+    }
+    
     public static InfluxdbProtocol http(String host, int port, String user, String password) {
         return new HttpInfluxdbProtocol(host, port, user, password);
     }

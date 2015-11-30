@@ -29,6 +29,10 @@ public class HttpInfluxdbProtocol implements InfluxdbProtocol {
         this(host, port, null, null);
     }
     
+    public HttpInfluxdbProtocol(String host, int port, String database) {
+        this(host, port, null, null, database);
+    }
+    
     public HttpInfluxdbProtocol() {
         this(DEFAULT_HOST, DEFAULT_PORT);
     }

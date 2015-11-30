@@ -23,6 +23,9 @@ public class QueueableSender extends AbstractSender {
 
     @Override
     public void send(Measurement m) {
+        if (m == null) {
+            return;     // NOOP for null measures
+        }
         if (measures.size() == queueSize) {
             // we have already reached the maximumn number of measure that can be sent in one shot
             // let's send them before adding a new one

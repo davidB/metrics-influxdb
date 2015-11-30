@@ -152,12 +152,28 @@ public class MeasurementReporter extends SkipIdleReporter {
                 .timestamp(timestamp)
                 .addTag(tags);
         Object o = g.getValue();
+        
+        if (o == null) {
+            // skip null values
+            return null;
+        }
         if (o instanceof Long || o instanceof Integer) {
             long value = ((Number)o).longValue();
             measure.addValue("value", value);
-        } else if (o instanceof Double || o instanceof Float) {
-            double value = ((Number)o).doubleValue();
-            measure.addValue("value", value);
+        } else if (o instanceof Double) {
+            Double d = (Double) o;
+            if (d.isInfinite() || d.isNaN()) {
+                // skip Infinite & NaN
+                return null;
+            }
+            measure.addValue("value", d.doubleValue());
+        } else if (o instanceof Float) {
+            Float f = (Float) o;
+            if (f.isInfinite() || f.isNaN()) {
+                // skip Infinite & NaN
+                return null;
+            }
+            measure.addValue("value", f.floatValue());
         } else {
             String value = ""+o;
             measure.addValue("value", value);

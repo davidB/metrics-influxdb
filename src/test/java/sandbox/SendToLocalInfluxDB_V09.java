@@ -37,8 +37,10 @@ public class SendToLocalInfluxDB_V09 {
 			r2 = startInfluxdbReporterUDPV09(registry);
 
 			// TODO what to do with NaN & infinity
-//			registerGaugeWithValues(registry, "double", Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 1);
-//			registerGaugeWithValues(registry, "float", Float.NaN, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, 1);
+			registerGaugeWithValues(registry, "integer", Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
+			registerGaugeWithValues(registry, "long", Long.MIN_VALUE, Long.MAX_VALUE, 1l);
+			registerGaugeWithValues(registry, "double", Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 1.0d);
+			registerGaugeWithValues(registry, "float", Float.NaN, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, 1.0f);
 
 			final Meter mymeter0 = registry.meter("MyMeter.0");
 			for (int i = 0; i < 100; i++) {

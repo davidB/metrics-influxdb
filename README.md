@@ -12,10 +12,10 @@
   this work.
 </p>
 
-
+[![Build Status](https://travis-ci.org/davidB/metrics-influxdb.svg?branch=master)](https://travis-ci.org/davidB/metrics-influxdb)
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/davidB/metrics-influxdb/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
-The library provide :
+# The library provide :
 
 * a lighter client than influxdb-java to push only series to an [InfluxDB](http://influxdb.org) server.
 * A reporter for [metrics](http://metrics.codahale.com/) which announces measurements.

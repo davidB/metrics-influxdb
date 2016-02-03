@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,20 +33,36 @@ public class UDPInlinerSender extends QueueableSender {
         }
         
         DatagramChannel channel = null;
+        try {
+            channel = DatagramChannel.open();
+        } catch (IOException e) {
+            LOGGER.error("failed open udp channel", e);
+            return false;
+        }
+        Iterator<Measurement> measuresIterator = measures.iterator();
+        int errorCounter = 0;
+        int successCounter = 0;
+        while(measuresIterator.hasNext()) {
+            String measuresAsString = inliner.inline(measuresIterator.next());
+            try {
+                if (LOGGER.isDebugEnabled()) {
+                  LOGGER.debug("measurement being sent:\n{}", measuresAsString);
+                }
 
-		String measuresAsString = inliner.inline(measures);
-		try {
-			if (LOGGER.isDebugEnabled()) {
-            	LOGGER.debug("measurements being sent:\n{}", measuresAsString);
+                ByteBuffer buffer = ByteBuffer.wrap(measuresAsString.getBytes(Miscellaneous.UTF8));
+                channel.send(buffer, serverAddress);
+                successCounter++;
+            } catch (Throwable e) {
+                errorCounter++;
             }
-			channel = DatagramChannel.open();
-			ByteBuffer buffer = ByteBuffer.wrap(measuresAsString.getBytes(Miscellaneous.UTF8));
-			channel.send(buffer, serverAddress);
-			LOGGER.debug("{} measurements sent to UDP[{}:{}]", measures.size(), serverAddress.getHostString(), serverAddress.getPort());
-			return true;
-		} catch (IOException e) {
-			LOGGER.info("failed to send {} mesures to UDP[{}:{}], {}", measures.size(), serverAddress.getHostString(), serverAddress.getPort(), e.getMessage(), e);
-			return false;
-		}
+        }
+        LOGGER.debug("{} measurements sent to UDP[{}:{}]; successes: {}, failures: {}",
+                measures.size(), serverAddress.getHostString(), serverAddress.getPort(), successCounter, errorCounter);
+        try {
+            channel.close();
+        } catch (IOException e) {
+            LOGGER.error("failed close udp channel", e);
+        }
+        return successCounter > 0;
     }
 }

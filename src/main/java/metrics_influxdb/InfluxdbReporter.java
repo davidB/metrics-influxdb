@@ -52,27 +52,27 @@ import metrics_influxdb.misc.VisibilityIncreasedForTests;
  */
 public class InfluxdbReporter extends SkipIdleReporter {
 	private static String[] COLUMNS_TIMER = {
-		"time", "count"
-		, "min", "max", "mean", "std-dev"
-		, "50-percentile", "75-percentile", "95-percentile", "99-percentile", "999-percentile"
-		, "one-minute", "five-minute", "fifteen-minute", "mean-rate"
-		, "run-count"
+			"time", "count"
+			, "min", "max", "mean", "std-dev"
+			, "50-percentile", "75-percentile", "95-percentile", "99-percentile", "999-percentile"
+			, "one-minute", "five-minute", "fifteen-minute", "mean-rate"
+			, "run-count"
 	};
 	private static String[] COLUMNS_HISTOGRAM = {
-		"time", "count"
-		, "min", "max", "mean", "std-dev"
-		, "50-percentile", "75-percentile", "95-percentile", "99-percentile", "999-percentile"
-		, "run-count"
+			"time", "count"
+			, "min", "max", "mean", "std-dev"
+			, "50-percentile", "75-percentile", "95-percentile", "99-percentile", "999-percentile"
+			, "run-count"
 	};
 	private static String[] COLUMNS_COUNT = {
-		"time", "count"
+			"time", "count"
 	};
 	private static String[] COLUMNS_GAUGE = {
-		"time", "value"
+			"time", "value"
 	};
 	private static String[] COLUMNS_METER = {
-		"time", "count"
-		, "one-minute", "five-minute", "fifteen-minute", "mean-rate"
+			"time", "count"
+			, "one-minute", "five-minute", "fifteen-minute", "mean-rate"
 	};
 
 	/**
@@ -100,9 +100,9 @@ public class InfluxdbReporter extends SkipIdleReporter {
 		private MetricFilter filter;
 		private boolean skipIdleMetrics;
 
-        @VisibilityIncreasedForTests InfluxDBCompatibilityVersions influxdbVersion;
-        @VisibilityIncreasedForTests InfluxdbProtocol protocol;
-        @VisibilityIncreasedForTests Influxdb influxdbDelegate;
+		@VisibilityIncreasedForTests InfluxDBCompatibilityVersions influxdbVersion;
+		@VisibilityIncreasedForTests InfluxdbProtocol protocol;
+		@VisibilityIncreasedForTests Influxdb influxdbDelegate;
 		@VisibilityIncreasedForTests Map<String, String> tags;
 		@VisibilityIncreasedForTests MetricMeasurementTransformer transformer = MetricMeasurementTransformer.NOOP;
 
@@ -203,71 +203,71 @@ public class InfluxdbReporter extends SkipIdleReporter {
 					skipIdleMetrics);
 		}
 
-        public ScheduledReporter build() {
-            ScheduledReporter reporter;
+		public ScheduledReporter build() {
+			ScheduledReporter reporter;
 
-            switch (influxdbVersion) {
-            case V08:
-                reporter = new InfluxdbReporter(registry, influxdbDelegate, clock, prefix, rateUnit, durationUnit, filter, skipIdleMetrics);
-                break;
-            default:
-            	Sender s = null;
-                if (protocol instanceof HttpInfluxdbProtocol) {
-                    s = new HttpInlinerSender((HttpInfluxdbProtocol) protocol);
-                    // TODO allow registration of transformers
-                    // TODO evaluate need of prefix (vs tags)
-                } else if (protocol instanceof UDPInfluxdbProtocol) {
-                	s = new UDPInlinerSender((UDPInfluxdbProtocol) protocol);
-                } else {
-                    throw new IllegalStateException("unsupported protocol: " + protocol);
-                }
-                reporter = new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, tags, transformer);
-            }
-            return reporter;
-        }
+			switch (influxdbVersion) {
+			case V08:
+				reporter = new InfluxdbReporter(registry, influxdbDelegate, clock, prefix, rateUnit, durationUnit, filter, skipIdleMetrics);
+				break;
+			default:
+				Sender s = null;
+				if (protocol instanceof HttpInfluxdbProtocol) {
+					s = new HttpInlinerSender((HttpInfluxdbProtocol) protocol);
+					// TODO allow registration of transformers
+					// TODO evaluate need of prefix (vs tags)
+				} else if (protocol instanceof UDPInfluxdbProtocol) {
+					s = new UDPInlinerSender((UDPInfluxdbProtocol) protocol);
+				} else {
+					throw new IllegalStateException("unsupported protocol: " + protocol);
+				}
+				reporter = new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, tags, transformer);
+			}
+			return reporter;
+		}
 
-        /**
-         * Operates with influxdb version less or equal to 08.
-         * @param delegate the influxdb delegate to use, cannot be null
-         * @return the builder itself
-         */
-        public Builder v08(Influxdb delegate) {
-            Objects.requireNonNull(delegate, "given Influxdb cannot be null");
-            this.influxdbVersion  = InfluxDBCompatibilityVersions.V08;
-            this.influxdbDelegate = delegate;
-            return this;
-        }
+		/**
+		 * Operates with influxdb version <= 08. 
+		 * @param delegate the influxdb delegate to use, cannot be null
+		 * @return the builder itself
+		 */
+		public Builder v08(Influxdb delegate) {
+			Objects.requireNonNull(delegate, "given Influxdb cannot be null");
+			this.influxdbVersion  = InfluxDBCompatibilityVersions.V08;
+			this.influxdbDelegate = delegate;
+			return this;
+		}
 
-        /**
-         * Override the protocol to use.
-         * @param protocol a non null protocol
-         * @return
-         */
-        public Builder protocol(InfluxdbProtocol protocol) {
-            Objects.requireNonNull(protocol, "given InfluxdbProtocol cannot be null");
-            this.protocol = protocol;
-            return this;
-        }
+		/**
+		 * Override the protocol to use.
+		 * @param protocol a non null protocol
+		 * @return
+		 */
+		public Builder protocol(InfluxdbProtocol protocol) {
+			Objects.requireNonNull(protocol, "given InfluxdbProtocol cannot be null");
+			this.protocol = protocol;
+			return this;
+		}
 
-        /**
-         * Sets the metric2measurement transformer to be used.
-         * @param transformer a non null transformer
-         * @return
-         */
-        public Builder transformer(MetricMeasurementTransformer transformer) {
-            Objects.requireNonNull(transformer, "given MetricMeasurementTransformer cannot be null");
-            this.transformer = transformer;
-            return this;
-        }
+		/**
+		 * Sets the metric2measurement transformer to be used.
+		 * @param transformer a non null transformer
+		 * @return
+		 */
+		public Builder transformer(MetricMeasurementTransformer transformer) {
+			Objects.requireNonNull(transformer, "given MetricMeasurementTransformer cannot be null");
+			this.transformer = transformer;
+			return this;
+		}
 
-        /**
-         * Registers the given key/value as a default tag for the generated measurements.
-         * @param tagKey the key to register, cannot be null or empty
-         * @param tagValue the value to register against the given key, cannot be null or empty
-         */
+		/**
+		 * Registers the given key/value as a default tag for the generated measurements.
+		 * @param tagKey the key to register, cannot be null or empty
+		 * @param tagValue the value to register against the given key, cannot be null or empty
+		 */
 		public Builder tag(String tagKey, String tagValue) {
-            Miscellaneous.requireNotEmptyParameter(tagKey, "tag");
-            Miscellaneous.requireNotEmptyParameter(tagValue, "value");
+			Miscellaneous.requireNotEmptyParameter(tagKey, "tag");
+			Miscellaneous.requireNotEmptyParameter(tagValue, "value");
 			tags.put(tagKey, tagValue);
 			return this;
 		}
@@ -344,14 +344,14 @@ public class InfluxdbReporter extends SkipIdleReporter {
 	}
 
 	private InfluxdbReporter(MetricRegistry registry, MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit) {
-	    super(registry, "influxdb-reporter", filter, rateUnit, durationUnit, true);
+		super(registry, "influxdb-reporter", filter, rateUnit, durationUnit, true);
 
-        this.influxdb = null;
-        this.clock = null;
-        this.prefix = "";
-    }
+		this.influxdb = null;
+		this.clock = null;
+		this.prefix = "";
+	}
 
-    @Override
+	@Override
 	@SuppressWarnings("rawtypes")
 	public void report(SortedMap<String, Gauge> gauges,
 			SortedMap<String, Counter> counters,

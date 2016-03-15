@@ -37,15 +37,15 @@ public class InfluxdbUdpSandbox {
 
 	private static InfluxdbReporter getInfluxdbReporter(MetricRegistry registry) throws Exception {
 		final InfluxdbUdp influxdb = new InfluxdbUdp(
-			getEnv(ENV_INFLUX_HOST),
-			Integer.parseInt(getEnv(ENV_INFLUX_PORT)));
+				getEnv(ENV_INFLUX_HOST),
+				Integer.parseInt(getEnv(ENV_INFLUX_PORT)));
 		return InfluxdbReporter
-			.forRegistry(registry)
-			.prefixedWith(getEnv(ENV_REGISTRY_PREFIX, "test"))
-			.convertRatesTo(TimeUnit.SECONDS)
-			.convertDurationsTo(TimeUnit.MILLISECONDS)
-			.filter(MetricFilter.ALL)
-			.build(influxdb);
+				.forRegistry(registry)
+				.prefixedWith(getEnv(ENV_REGISTRY_PREFIX, "test"))
+				.convertRatesTo(TimeUnit.SECONDS)
+				.convertDurationsTo(TimeUnit.MILLISECONDS)
+				.filter(MetricFilter.ALL)
+				.build(influxdb);
 	}
 
 	private static String getEnv(String key) throws Exception {

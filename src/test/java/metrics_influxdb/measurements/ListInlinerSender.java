@@ -7,21 +7,21 @@ import java.util.List;
 import metrics_influxdb.serialization.line.Inliner;
 
 public class ListInlinerSender extends QueueableSender {
-    private Inliner inliner;
-    private List<String> frames;
+	private Inliner inliner;
+	private List<String> frames;
 
-    public ListInlinerSender(int queueSize) {
-        super(queueSize);
-        inliner = new Inliner();
-        frames = new LinkedList<>();
-    }
-    
-    @Override
-    protected boolean doSend(Collection<Measurement> measuresToSend) {
-        return frames.add(inliner.inline(measuresToSend));
-    }
+	public ListInlinerSender(int queueSize) {
+		super(queueSize);
+		inliner = new Inliner();
+		frames = new LinkedList<>();
+	}
 
-    public List<String> getFrames() {
-        return frames;
-    }
+	@Override
+	protected boolean doSend(Collection<Measurement> measuresToSend) {
+		return frames.add(inliner.inline(measuresToSend));
+	}
+
+	public List<String> getFrames() {
+		return frames;
+	}
 }

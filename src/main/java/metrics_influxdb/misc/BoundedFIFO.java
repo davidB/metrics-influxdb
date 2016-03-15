@@ -7,127 +7,127 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class BoundedFIFO<T> implements Queue<T> {
-    private final LinkedBlockingQueue<T> delegate;
-    
-    public BoundedFIFO(int capacity) {
-        this.delegate = new LinkedBlockingQueue<>(capacity);
-    } 
+	private final LinkedBlockingQueue<T> delegate;
 
-    public int hashCode() {
-        return delegate.hashCode();
-    }
+	public BoundedFIFO(int capacity) {
+		this.delegate = new LinkedBlockingQueue<>(capacity);
+	} 
 
-    public boolean add(T e) {
-        while (!delegate.add(e)) {
-            delegate.poll();
-        }
-        return true;
-    }
+	public int hashCode() {
+		return delegate.hashCode();
+	}
 
-    public boolean isEmpty() {
-        return delegate.isEmpty();
-    }
+	public boolean add(T e) {
+		while (!delegate.add(e)) {
+			delegate.poll();
+		}
+		return true;
+	}
 
-    public T remove() {
-        return delegate.remove();
-    }
+	public boolean isEmpty() {
+		return delegate.isEmpty();
+	}
 
-    public boolean equals(Object obj) {
-        return delegate.equals(obj);
-    }
+	public T remove() {
+		return delegate.remove();
+	}
 
-    public T element() {
-        return delegate.element();
-    }
+	public boolean equals(Object obj) {
+		return delegate.equals(obj);
+	}
 
-    public boolean addAll(Collection<? extends T> c) {
-        return delegate.addAll(c);
-    }
+	public T element() {
+		return delegate.element();
+	}
 
-    public int size() {
-        return delegate.size();
-    }
+	public boolean addAll(Collection<? extends T> c) {
+		return delegate.addAll(c);
+	}
 
-    public int remainingCapacity() {
-        return delegate.remainingCapacity();
-    }
+	public int size() {
+		return delegate.size();
+	}
 
-    public void put(T e) throws InterruptedException {
-        delegate.put(e);
-    }
+	public int remainingCapacity() {
+		return delegate.remainingCapacity();
+	}
 
-    public boolean containsAll(Collection<?> c) {
-        return delegate.containsAll(c);
-    }
+	public void put(T e) throws InterruptedException {
+		delegate.put(e);
+	}
 
-    public boolean offer(T e, long timeout, TimeUnit unit) throws InterruptedException {
-        return offer(e);
-    }
+	public boolean containsAll(Collection<?> c) {
+		return delegate.containsAll(c);
+	}
 
-    public boolean removeAll(Collection<?> c) {
-        return delegate.removeAll(c);
-    }
+	public boolean offer(T e, long timeout, TimeUnit unit) throws InterruptedException {
+		return offer(e);
+	}
 
-    public boolean offer(T e) {
-        while (!delegate.offer(e)) {
-            delegate.poll();
-        }
-        return true;
-    }
+	public boolean removeAll(Collection<?> c) {
+		return delegate.removeAll(c);
+	}
 
-    public boolean retainAll(Collection<?> c) {
-        return delegate.retainAll(c);
-    }
+	public boolean offer(T e) {
+		while (!delegate.offer(e)) {
+			delegate.poll();
+		}
+		return true;
+	}
 
-    public T take() throws InterruptedException {
-        return delegate.take();
-    }
+	public boolean retainAll(Collection<?> c) {
+		return delegate.retainAll(c);
+	}
 
-    public T poll(long timeout, TimeUnit unit) throws InterruptedException {
-        return delegate.poll(timeout, unit);
-    }
+	public T take() throws InterruptedException {
+		return delegate.take();
+	}
 
-    public T poll() {
-        return delegate.poll();
-    }
+	public T poll(long timeout, TimeUnit unit) throws InterruptedException {
+		return delegate.poll(timeout, unit);
+	}
 
-    public T peek() {
-        return delegate.peek();
-    }
+	public T poll() {
+		return delegate.poll();
+	}
 
-    public boolean remove(Object o) {
-        return delegate.remove(o);
-    }
+	public T peek() {
+		return delegate.peek();
+	}
 
-    public boolean contains(Object o) {
-        return delegate.contains(o);
-    }
+	public boolean remove(Object o) {
+		return delegate.remove(o);
+	}
 
-    public Object[] toArray() {
-        return delegate.toArray();
-    }
+	public boolean contains(Object o) {
+		return delegate.contains(o);
+	}
 
-    public <E> E[] toArray(E[] a) {
-        return delegate.toArray(a);
-    }
+	public Object[] toArray() {
+		return delegate.toArray();
+	}
 
-    public String toString() {
-        return delegate.toString();
-    }
+	public <E> E[] toArray(E[] a) {
+		return delegate.toArray(a);
+	}
 
-    public void clear() {
-        delegate.clear();
-    }
+	public String toString() {
+		return delegate.toString();
+	}
 
-    public int drainTo(Collection<? super T> c) {
-        return delegate.drainTo(c);
-    }
+	public void clear() {
+		delegate.clear();
+	}
 
-    public int drainTo(Collection<? super T> c, int maxElements) {
-        return delegate.drainTo(c, maxElements);
-    }
+	public int drainTo(Collection<? super T> c) {
+		return delegate.drainTo(c);
+	}
 
-    public Iterator<T> iterator() {
-        return delegate.iterator();
-    }
+	public int drainTo(Collection<? super T> c, int maxElements) {
+		return delegate.drainTo(c, maxElements);
+	}
+
+	public Iterator<T> iterator() {
+		return delegate.iterator();
+	}
 }

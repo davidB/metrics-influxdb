@@ -334,17 +334,17 @@ public class InfluxdbReporter extends SkipIdleReporter {
 	private final String prefix;
 	// Optimization : use pointsXxx to reduce object creation, by reuse as arg of
 	// Influxdb.appendSeries(...)
-	@VisibilityIncreasedForTests protected final Object[][] timerPoints;
-	@VisibilityIncreasedForTests protected final Object[][] histogramPoints;
-	@VisibilityIncreasedForTests protected final Object[][] countPoints;
-	@VisibilityIncreasedForTests protected final Object[][] gaugePoints;
-	@VisibilityIncreasedForTests protected final Object[][] meterPoints;
+	@VisibilityIncreasedForTests final Object[][] timerPoints;
+	@VisibilityIncreasedForTests final Object[][] histogramPoints;
+	@VisibilityIncreasedForTests final Object[][] countPoints;
+	@VisibilityIncreasedForTests final Object[][] gaugePoints;
+	@VisibilityIncreasedForTests final Object[][] meterPoints;
 
-	@VisibilityIncreasedForTests protected final String[] timerColumns;
-	@VisibilityIncreasedForTests protected final String[] histogramColumns;
-	@VisibilityIncreasedForTests protected final String[] countColumns;
-	@VisibilityIncreasedForTests protected final String[] gaugeColumns;
-	@VisibilityIncreasedForTests protected final String[] meterColumns;
+	@VisibilityIncreasedForTests final String[] timerColumns;
+	@VisibilityIncreasedForTests final String[] histogramColumns;
+	@VisibilityIncreasedForTests final String[] countColumns;
+	@VisibilityIncreasedForTests final String[] gaugeColumns;
+	@VisibilityIncreasedForTests final String[] meterColumns;
 
 	private InfluxdbReporter(
 			MetricRegistry registry,

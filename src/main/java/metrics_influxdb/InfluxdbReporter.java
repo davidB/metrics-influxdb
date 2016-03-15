@@ -12,7 +12,10 @@
 //	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 package metrics_influxdb;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
@@ -52,28 +55,77 @@ import metrics_influxdb.misc.VisibilityIncreasedForTests;
  *      time series database with no external dependencies.</a>
  */
 public class InfluxdbReporter extends SkipIdleReporter {
-	private static String[] COLUMNS_TIMER = {
+	private static final String[] DEFAULT_TIMER_COLUMNS = {
 		"time", "count"
 		, "min", "max", "mean", "std-dev"
 		, "50-percentile", "75-percentile", "95-percentile", "99-percentile", "999-percentile"
 		, "one-minute", "five-minute", "fifteen-minute", "mean-rate"
 		, "run-count"
 	};
-	private static String[] COLUMNS_HISTOGRAM = {
+	private static final String[] DEFAULT_HISTOGRAM_COLUMNS = {
 		"time", "count"
 		, "min", "max", "mean", "std-dev"
 		, "50-percentile", "75-percentile", "95-percentile", "99-percentile", "999-percentile"
 		, "run-count"
 	};
-	private static String[] COLUMNS_COUNT = {
+	private static final String[] DEFAULT_COUNT_COLUMNS = {
 		"time", "count"
 	};
-	private static String[] COLUMNS_GAUGE = {
+	private static final String[] DEFAULT_GAUGE_COLUMNS = {
 		"time", "value"
 	};
-	private static String[] COLUMNS_METER = {
+	private static final String[] DEFAULT_METER_COLUMNS = {
 		"time", "count"
 		, "one-minute", "five-minute", "fifteen-minute", "mean-rate"
+	};
+
+	private static final Object[] DEFAULT_TIMER_POINTS = {
+		0l,
+		0,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0l
+	};
+	private static final Object[] DEFAULT_HISTOGRAM_POINTS = {
+		0l,
+		0,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d,
+		0l
+	};
+	private static final Object[] DEFAULT_COUNT_POINTS = {
+		0l,
+		0l
+	};
+	private static final Object[] DEFAULT_GAUGE_POINTS = {
+		0l,
+		null
+	};
+	private static final Object[] DEFAULT_METER_POINTS = {
+		0l,
+		0,
+		0.0d,
+		0.0d,
+		0.0d,
+		0.0d
 	};
 
 	/**
@@ -201,7 +253,8 @@ public class InfluxdbReporter extends SkipIdleReporter {
 					rateUnit,
 					durationUnit,
 					filter,
-					skipIdleMetrics);
+					skipIdleMetrics,
+					tags);
 		}
 
         public ScheduledReporter build() {
@@ -209,7 +262,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
             
             switch (influxdbVersion) {
             case V08:
-                reporter = new InfluxdbReporter(registry, influxdbDelegate, clock, prefix, rateUnit, durationUnit, filter, skipIdleMetrics);
+                reporter = new InfluxdbReporter(registry, influxdbDelegate, clock, prefix, rateUnit, durationUnit, filter, skipIdleMetrics, tags);
                 break;
             default:
             	Sender s = null;
@@ -281,76 +334,59 @@ public class InfluxdbReporter extends SkipIdleReporter {
 	private final String prefix;
 	// Optimization : use pointsXxx to reduce object creation, by reuse as arg of
 	// Influxdb.appendSeries(...)
-	private final Object[][] pointsTimer = { {
-		0l,
-		0,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0l
-	} };
-	private final Object[][] pointsHistogram = { {
-		0l,
-		0,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d,
-		0l
-	} };
-	private final Object[][] pointsCounter = { {
-		0l,
-		0l
-	} };
-	private final Object[][] pointsGauge = { {
-		0l,
-		null
-	} };
-	private final Object[][] pointsMeter = { {
-		0l,
-		0,
-		0.0d,
-		0.0d,
-		0.0d,
-		0.0d
-	} };
+	@VisibilityIncreasedForTests protected final Object[][] timerPoints;
+	@VisibilityIncreasedForTests protected final Object[][] histogramPoints;
+	@VisibilityIncreasedForTests protected final Object[][] countPoints;
+	@VisibilityIncreasedForTests protected final Object[][] gaugePoints;
+	@VisibilityIncreasedForTests protected final Object[][] meterPoints;
 
-	private InfluxdbReporter(MetricRegistry registry,
+	@VisibilityIncreasedForTests protected final String[] timerColumns;
+	@VisibilityIncreasedForTests protected final String[] histogramColumns;
+	@VisibilityIncreasedForTests protected final String[] countColumns;
+	@VisibilityIncreasedForTests protected final String[] gaugeColumns;
+	@VisibilityIncreasedForTests protected final String[] meterColumns;
+
+	private InfluxdbReporter(
+			MetricRegistry registry,
 			Influxdb influxdb,
 			Clock clock,
 			String prefix,
 			TimeUnit rateUnit,
 			TimeUnit durationUnit,
 			MetricFilter filter,
-			boolean skipIdleMetrics) {
+			boolean skipIdleMetrics,
+			Map<String, String> tags) {
+
 		super(registry, "influxdb-reporter", filter, rateUnit, durationUnit, skipIdleMetrics);
+
 		this.influxdb = influxdb;
 		this.clock = clock;
 		this.prefix = (prefix == null) ? "" : (prefix.trim() + ".");
+
+		this.timerColumns = fillTags(DEFAULT_TIMER_COLUMNS, tags.keySet());
+		this.histogramColumns = fillTags(DEFAULT_HISTOGRAM_COLUMNS, tags.keySet());
+		this.countColumns = fillTags(DEFAULT_COUNT_COLUMNS, tags.keySet());
+		this.gaugeColumns = fillTags(DEFAULT_GAUGE_COLUMNS, tags.keySet());
+		this.meterColumns = fillTags(DEFAULT_METER_COLUMNS, tags.keySet());
+
+		this.timerPoints = new Object[][] {fillTags(DEFAULT_TIMER_POINTS, tags.values())};
+		this.histogramPoints = new Object[][] {fillTags(DEFAULT_HISTOGRAM_POINTS, tags.values())};
+		this.countPoints = new Object[][] {fillTags(DEFAULT_COUNT_POINTS, tags.values())};
+		this.gaugePoints = new Object[][] {fillTags(DEFAULT_GAUGE_POINTS, tags.values())};
+		this.meterPoints = new Object[][] {fillTags(DEFAULT_METER_POINTS, tags.values())};
 	}
 
-	private InfluxdbReporter(MetricRegistry registry, MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit) {
-	    super(registry, "influxdb-reporter", filter, rateUnit, durationUnit, true);
-	    
-        this.influxdb = null;
-        this.clock = null;
-        this.prefix = "";
-    }
+	private <T, V extends T> T[] fillTags(T[] defaults, Collection<V> collection) {
+		T[] result = Arrays.copyOf(defaults, defaults.length + collection.size());
+		int resultIndex = defaults.length;
+		Iterator<V> it = collection.iterator();
+		while (resultIndex < result.length && it.hasNext()) {
+			result[resultIndex] = it.next();
+			++resultIndex;
+		}
+
+		return result;
+	}
 
     @Override
 	@SuppressWarnings("rawtypes")
@@ -398,7 +434,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
 			return;
 		}
 		final Snapshot snapshot = timer.getSnapshot();
-		Object[] p = pointsTimer[0];
+		Object[] p = timerPoints[0];
 		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = snapshot.size();
 		p[2] = convertDuration(snapshot.getMin());
@@ -415,8 +451,8 @@ public class InfluxdbReporter extends SkipIdleReporter {
 		p[13] = convertRate(timer.getFifteenMinuteRate());
 		p[14] = convertRate(timer.getMeanRate());
 		p[15] = timer.getCount();
-		assert (p.length == COLUMNS_TIMER.length);
-		influxdb.appendSeries(prefix, name, ".timer", COLUMNS_TIMER, pointsTimer);
+		assert (p.length == timerColumns.length);
+		influxdb.appendSeries(prefix, name, ".timer", timerColumns, timerPoints);
 	}
 
 	private void reportHistogram(String name, Histogram histogram, long timestamp) {
@@ -424,7 +460,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
 			return;
 		}
 		final Snapshot snapshot = histogram.getSnapshot();
-		Object[] p = pointsHistogram[0];
+		Object[] p = histogramPoints[0];
 		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = snapshot.size();
 		p[2] = snapshot.getMin();
@@ -437,38 +473,38 @@ public class InfluxdbReporter extends SkipIdleReporter {
 		p[9] = snapshot.get99thPercentile();
 		p[10] = snapshot.get999thPercentile();
 		p[11] = histogram.getCount();
-		assert (p.length == COLUMNS_HISTOGRAM.length);
-		influxdb.appendSeries(prefix, name, ".histogram", COLUMNS_HISTOGRAM, pointsHistogram);
+		assert (p.length == histogramColumns.length);
+		influxdb.appendSeries(prefix, name, ".histogram", histogramColumns, histogramPoints);
 	}
 
 	private void reportCounter(String name, Counter counter, long timestamp) {
-		Object[] p = pointsCounter[0];
+		Object[] p = countPoints[0];
 		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = counter.getCount();
-		assert (p.length == COLUMNS_COUNT.length);
-		influxdb.appendSeries(prefix, name, ".count", COLUMNS_COUNT, pointsCounter);
+		assert (p.length == countColumns.length);
+		influxdb.appendSeries(prefix, name, ".count", countColumns, countPoints);
 	}
 
 	private void reportGauge(String name, Gauge<?> gauge, long timestamp) {
-		Object[] p = pointsGauge[0];
+		Object[] p = gaugePoints[0];
 		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = gauge.getValue();
-		assert (p.length == COLUMNS_GAUGE.length);
-		influxdb.appendSeries(prefix, name, ".value", COLUMNS_GAUGE, pointsGauge);
+		assert (p.length == gaugeColumns.length);
+		influxdb.appendSeries(prefix, name, ".value", gaugeColumns, gaugePoints);
 	}
 
 	private void reportMeter(String name, Metered meter, long timestamp) {
 		if (canSkipMetric(name, meter)) {
 			return;
 		}
-		Object[] p = pointsMeter[0];
+		Object[] p = meterPoints[0];
 		p[0] = influxdb.convertTimestamp(timestamp);
 		p[1] = meter.getCount();
 		p[2] = convertRate(meter.getOneMinuteRate());
 		p[3] = convertRate(meter.getFiveMinuteRate());
 		p[4] = convertRate(meter.getFifteenMinuteRate());
 		p[5] = convertRate(meter.getMeanRate());
-		assert (p.length == COLUMNS_METER.length);
-		influxdb.appendSeries(prefix, name, ".meter", COLUMNS_METER, pointsMeter);
+		assert (p.length == meterColumns.length);
+		influxdb.appendSeries(prefix, name, ".meter", meterColumns, meterPoints);
 	}
 }

@@ -36,7 +36,6 @@ import com.codahale.metrics.Timer;
 import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
 import metrics_influxdb.api.protocols.HttpInfluxdbProtocol;
 import metrics_influxdb.api.protocols.InfluxdbProtocol;
-import metrics_influxdb.api.protocols.InfluxdbProtocols;
 import metrics_influxdb.api.protocols.UDPInfluxdbProtocol;
 import metrics_influxdb.measurements.HttpInlinerSender;
 import metrics_influxdb.measurements.MeasurementReporter;
@@ -114,7 +113,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
 			this.rateUnit = TimeUnit.SECONDS;
 			this.durationUnit = TimeUnit.MILLISECONDS;
 			this.filter = MetricFilter.ALL;
-			this.protocol = InfluxdbProtocols.http();
+			this.protocol = new HttpInfluxdbProtocol();
 			this.influxdbVersion = InfluxDBCompatibilityVersions.LATEST;
 			this.tags = new HashMap<>();
 		}

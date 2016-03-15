@@ -71,7 +71,7 @@ public class SendToLocalInfluxDB {
   }
 
 private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws Exception {
-    final InfluxdbHttp influxdb = new InfluxdbHttp("127.0.0.1", 8086, "dev", "u0", "u0PWD");
+    final InfluxdbHttp influxdb = new InfluxdbHttp("127.0.0.1", 8086, "test", "u0", "u0PWD");
     //influxdb.debugJson = true;
     final InfluxdbReporter reporter = InfluxdbReporter
         .forRegistry(registry)

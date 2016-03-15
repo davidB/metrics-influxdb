@@ -19,7 +19,6 @@ import com.codahale.metrics.ScheduledReporter;
 import metrics_influxdb.InfluxdbReporter.Builder;
 import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
 import metrics_influxdb.api.protocols.HttpInfluxdbProtocol;
-import metrics_influxdb.api.protocols.InfluxdbProtocols;
 
 public class InfluxdbReporterBuilderTest {
     private MetricRegistry registry;
@@ -73,7 +72,7 @@ public class InfluxdbReporterBuilderTest {
         ScheduledReporter reporter =
                 InfluxdbReporter
                     .forRegistry(registry)
-                    .protocol(InfluxdbProtocols.http())
+                    .protocol(new HttpInfluxdbProtocol())
                     .build();
 
         assertThat(reporter, notNullValue());
@@ -110,7 +109,7 @@ public class InfluxdbReporterBuilderTest {
 		Builder builder = InfluxdbReporter
 		.forRegistry(registry)
 		.tag(tagKey, tagValue)
-		.protocol(InfluxdbProtocols.http());
+		.protocol(new HttpInfluxdbProtocol());
 
     	assertThat(builder.tags, notNullValue());
     	assertThat(builder.tags, hasEntry(tagKey, tagValue));

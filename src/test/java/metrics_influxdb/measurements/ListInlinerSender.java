@@ -17,7 +17,7 @@ public class ListInlinerSender extends QueueableSender {
 	}
 
 	@Override
-	protected boolean doSend(Collection<Measurement> measuresToSend) {
+	protected boolean doSend(Collection<Measure> measuresToSend) {
 		return frames.add(inliner.inline(measuresToSend));
 	}
 

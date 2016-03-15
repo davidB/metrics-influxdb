@@ -8,7 +8,7 @@ import com.codahale.metrics.Clock;
 
 import metrics_influxdb.misc.Miscellaneous;
 
-public class Measure implements Measurement {
+public class Measure {
 	private String name;
 	private Map<String, String> tags;
 	private Map<String, String> values;
@@ -133,22 +133,18 @@ public class Measure implements Measurement {
 		return "\"" + Miscellaneous.escape(value, '"') + "\"";
 	}
 
-	@Override
 	public String getName() {
 		return name;
 	}
 
-	@Override
 	public Map<String, String> getTags() {
 		return tags;
 	}
 
-	@Override
 	public Map<String, String> getValues() {
 		return values;
 	}
 
-	@Override
 	public long getTimestamp() {
 		return timestamp;
 	}

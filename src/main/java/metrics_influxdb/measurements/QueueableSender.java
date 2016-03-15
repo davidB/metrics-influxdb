@@ -6,7 +6,7 @@ import java.util.Collection;
 import metrics_influxdb.misc.BoundedFIFO;
 
 public class QueueableSender extends AbstractSender {
-	private final Collection<Measurement> measures;
+	private final Collection<Measure> measures;
 	private int queueSize;
 
 	protected QueueableSender(int queueSize) {
@@ -22,7 +22,7 @@ public class QueueableSender extends AbstractSender {
 	}
 
 	@Override
-	public void send(Measurement m) {
+	public void send(Measure m) {
 		if (m == null) {
 			return;     // NOOP for null measures
 		}
@@ -41,7 +41,7 @@ public class QueueableSender extends AbstractSender {
 	 * @param measuresToSend the collection of measure to be sent
 	 * @return true if the measures have been sent and can be discarded, false otherwise
 	 */
-	protected boolean doSend(Collection<Measurement> measuresToSend) {
+	protected boolean doSend(Collection<Measure> measuresToSend) {
 		return true;
 	}
 

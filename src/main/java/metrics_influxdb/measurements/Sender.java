@@ -9,15 +9,15 @@ public interface Sender extends Closeable {
 	 */
 	public void flush();
 	/**
-	 * Send the given {@link Measurement}.
+	 * Send the given {@link Measure}.
 	 * Depending on the implementation, the {@link Sender} is allowed to enqueue the real sending action. 
-	 * @param m the measurement to be sent, if null this method is a NOOP
+	 * @param m the Measure to be sent, if null this method is a NOOP
 	 */
-	public void send(Measurement m);
+	public void send(Measure m);
 	/**
-	 * Send the given measurements.
+	 * Send the given Measures.
 	 * Depending on the implementation, the {@link Sender} is allowed to enqueue the real sending action. 
-	 * @param measures the measurements to be sent, if null this method is a NOOP
+	 * @param measures the Measures to be sent, if null this method is a NOOP
 	 */
-	public void send(Collection<Measurement> measures);
+	public void send(Collection<Measure> measures);
 }

@@ -2,11 +2,11 @@ package metrics_influxdb.serialization.line;
 
 import java.util.Map;
 
-import metrics_influxdb.measurements.Measurement;
+import metrics_influxdb.measurements.Measure;
 import metrics_influxdb.misc.Miscellaneous;
 
 public class Inliner {
-	public String inline(Measurement m) {
+	public String inline(Measure m) {
 		String key = buildMeasureKey(m.getName(), m.getTags());
 		String values = buildMeasureFields(m.getValues());
 		String timestamp = "" + m.getTimestamp();
@@ -14,11 +14,11 @@ public class Inliner {
 		return key + " " + values +  " " + timestamp;
 	}
 
-	public String inline(Iterable<Measurement> measurements) {
+	public String inline(Iterable<Measure> measures) {
 		StringBuilder sb = new StringBuilder();
 		String join = "";
 		String cr = "\n";
-		for (Measurement m : measurements) {
+		for (Measure m : measures) {
 			sb.append(join).append(inline(m));
 			join = cr;
 		}

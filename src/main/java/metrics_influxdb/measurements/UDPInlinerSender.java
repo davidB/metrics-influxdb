@@ -27,7 +27,7 @@ public class UDPInlinerSender extends QueueableSender {
 	}
 
 	@Override
-	protected boolean doSend(Collection<Measurement> measures) {
+	protected boolean doSend(Collection<Measure> measures) {
 		if (measures.isEmpty()) {
 			return true;
 		}
@@ -39,14 +39,14 @@ public class UDPInlinerSender extends QueueableSender {
 			LOGGER.error("failed open udp channel", e);
 			return false;
 		}
-		Iterator<Measurement> measuresIterator = measures.iterator();
+		Iterator<Measure> measuresIterator = measures.iterator();
 		int errorCounter = 0;
 		int successCounter = 0;
 		while(measuresIterator.hasNext()) {
 			String measuresAsString = inliner.inline(measuresIterator.next());
 			try {
 				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("measurement being sent:\n{}", measuresAsString);
+					LOGGER.debug("Measure being sent:\n{}", measuresAsString);
 				}
 
 				ByteBuffer buffer = ByteBuffer.wrap(measuresAsString.getBytes(Miscellaneous.UTF8));
@@ -56,7 +56,7 @@ public class UDPInlinerSender extends QueueableSender {
 				errorCounter++;
 			}
 		}
-		LOGGER.debug("{} measurements sent to UDP[{}:{}]; successes: {}, failures: {}",
+		LOGGER.debug("{} Measures sent to UDP[{}:{}]; successes: {}, failures: {}",
 				measures.size(), serverAddress.getHostString(), serverAddress.getPort(), successCounter, errorCounter);
 		try {
 			channel.close();

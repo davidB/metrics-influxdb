@@ -18,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import metrics_influxdb.measurements.Measure;
-import metrics_influxdb.measurements.Measurement;
 import metrics_influxdb.serialization.line.Inliner;
 
 public class InlinerTest {
@@ -32,7 +31,7 @@ public class InlinerTest {
 	@Test
 	public void a_single_word_name_is_untouched() {
 		String name = "cpu";
-		Measurement m = new Measure(name, 1l);
+		Measure m = new Measure(name, 1l);
 
 		String output = inliner.inline(m);
 
@@ -42,7 +41,7 @@ public class InlinerTest {
 	@Test
 	public void spaces_in_name_are_escaped() {
 		String name = "cpu load";
-		Measurement m = new Measure(name, 1l);
+		Measure m = new Measure(name, 1l);
 
 		String output = inliner.inline(m);
 
@@ -52,7 +51,7 @@ public class InlinerTest {
 	@Test
 	public void comma_in_name_are_escaped() {
 		String name = "cpu,01";
-		Measurement m = new Measure(name, 1l);
+		Measure m = new Measure(name, 1l);
 
 		String output = inliner.inline(m);
 
@@ -62,7 +61,7 @@ public class InlinerTest {
 	@Test
 	public void comma_and_spaces_in_name_are_escaped() {
 		String name = "cpu load,01";
-		Measurement m = new Measure(name, 1l);
+		Measure m = new Measure(name, 1l);
 
 		String output = inliner.inline(m);
 
@@ -76,7 +75,7 @@ public class InlinerTest {
 		tags.put("server", "127.0.0.1");
 		tags.put("type", "prod");
 
-		Measurement m = new Measure(name, tags, 0l, System.currentTimeMillis());
+		Measure m = new Measure(name, tags, 0l, System.currentTimeMillis());
 
 		String output = inliner.inline(m);
 
@@ -90,7 +89,7 @@ public class InlinerTest {
 		Map<String, String> tags = new HashMap<>();
 		tags.put("server ip", "127.0.0.1");
 
-		Measurement m = new Measure(name, tags, 0l, System.currentTimeMillis());
+		Measure m = new Measure(name, tags, 0l, System.currentTimeMillis());
 
 		String output = inliner.inline(m);
 
@@ -104,7 +103,7 @@ public class InlinerTest {
 		Map<String, String> tags = new HashMap<>();
 		tags.put("server,ip", "127.0.0.1");
 
-		Measurement m = new Measure(name, tags, 0l, System.currentTimeMillis());
+		Measure m = new Measure(name, tags, 0l, System.currentTimeMillis());
 
 		String output = inliner.inline(m);
 
@@ -118,7 +117,7 @@ public class InlinerTest {
 		Map<String, String> tags = new HashMap<>();
 		tags.put("hero", "luke skywalker");
 
-		Measurement m = new Measure(name, tags, 0l, System.currentTimeMillis());
+		Measure m = new Measure(name, tags, 0l, System.currentTimeMillis());
 
 		String output = inliner.inline(m);
 
@@ -132,7 +131,7 @@ public class InlinerTest {
 		Map<String, String> tags = new HashMap<>();
 		tags.put("main hero", "luke, skywalker");
 
-		Measurement m = new Measure(name, tags, 0l, System.currentTimeMillis());
+		Measure m = new Measure(name, tags, 0l, System.currentTimeMillis());
 
 		String output = inliner.inline(m);
 
@@ -142,7 +141,7 @@ public class InlinerTest {
 	@Test
 	public void given_timestamp_is_used() {
 		long time = System.currentTimeMillis();
-		Measurement m = new Measure("cpu", 0l, time);
+		Measure m = new Measure("cpu", 0l, time);
 
 		String output = inliner.inline(m);
 
@@ -153,7 +152,7 @@ public class InlinerTest {
 	public void a_timestamp_is_generated_when_none_is_provided() {
 		Long initialTime = System.currentTimeMillis();
 
-		Measurement m = new Measure("cpu", 0l);
+		Measure m = new Measure("cpu", 0l);
 
 		String output = inliner.inline(m);
 
@@ -168,7 +167,7 @@ public class InlinerTest {
 
 	@Test
 	public void a_value_nammed_value_is_generated_for_single_float_value() {
-		Measurement m = new Measure("cpu", 80.0f);
+		Measure m = new Measure("cpu", 80.0f);
 
 		String output = inliner.inline(m);
 
@@ -177,7 +176,7 @@ public class InlinerTest {
 
 	@Test
 	public void a_value_nammed_value_is_generated_for_single_double_value() {
-		Measurement m = new Measure("cpu", 50.03d);
+		Measure m = new Measure("cpu", 50.03d);
 
 		String output = inliner.inline(m);
 
@@ -186,7 +185,7 @@ public class InlinerTest {
 
 	@Test
 	public void a_value_nammed_value_is_generated_for_single_integer_value() {
-		Measurement m = new Measure("cpu", 50);
+		Measure m = new Measure("cpu", 50);
 
 		String output = inliner.inline(m);
 
@@ -195,7 +194,7 @@ public class InlinerTest {
 
 	@Test
 	public void a_value_nammed_value_is_generated_for_single_long_value() {
-		Measurement m = new Measure("cpu", 75l);
+		Measure m = new Measure("cpu", 75l);
 
 		String output = inliner.inline(m);
 
@@ -204,7 +203,7 @@ public class InlinerTest {
 
 	@Test
 	public void a_value_nammed_value_is_generated_for_single_string_value() {
-		Measurement m = new Measure("cpu", "high");
+		Measure m = new Measure("cpu", "high");
 
 		String output = inliner.inline(m);
 
@@ -213,7 +212,7 @@ public class InlinerTest {
 
 	@Test
 	public void a_value_nammed_value_is_generated_for_single_true_value() {
-		Measurement m = new Measure("multi-core", Boolean.TRUE);
+		Measure m = new Measure("multi-core", Boolean.TRUE);
 
 		String output = inliner.inline(m);
 
@@ -222,7 +221,7 @@ public class InlinerTest {
 
 	@Test
 	public void a_value_nammed_value_is_generated_for_single_false_value() {
-		Measurement m = new Measure("multi-core", Boolean.FALSE);
+		Measure m = new Measure("multi-core", Boolean.FALSE);
 
 		String output = inliner.inline(m);
 
@@ -231,7 +230,7 @@ public class InlinerTest {
 
 	@Test
 	public void comma_or_spaces_in_string_values_are_not_escaped() {
-		Measurement m = new Measure("multi-core", "do not, escape");
+		Measure m = new Measure("multi-core", "do not, escape");
 
 		String output = inliner.inline(m);
 
@@ -240,7 +239,7 @@ public class InlinerTest {
 
 	@Test
 	public void value_names_with_spaces_and_comma_are_escaped() {
-		Measurement m = new Measure("cpu", Boolean.FALSE);
+		Measure m = new Measure("cpu", Boolean.FALSE);
 
 		String output = inliner.inline(m);
 
@@ -249,7 +248,7 @@ public class InlinerTest {
 
 	@Test
 	public void values_can_be_added_fluently() {
-		Measurement m = new Measure("cpu").addValue("load", 10).addValue("alert", true).addValue("reason", "value above maximum threshold");
+		Measure m = new Measure("cpu").addValue("load", 10).addValue("alert", true).addValue("reason", "value above maximum threshold");
 
 		String output = inliner.inline(m);
 
@@ -258,7 +257,7 @@ public class InlinerTest {
 
 	@Test
 	public void multiple_measurements_are_separated_by_cr_when_inlined() {
-		Measurement m = new Measure("load", 10);
+		Measure m = new Measure("load", 10);
 
 		String output = inliner.inline(Arrays.asList(m, m, m));
 

@@ -43,7 +43,7 @@ public class HttpInlinerSender extends QueueableSender {
 	}
 
 	@Override
-	protected boolean doSend(Collection<Measurement> measures) {
+	protected boolean doSend(Collection<Measure> measures) {
 		if (measures.isEmpty()) {
 			return true;
 		}
@@ -61,7 +61,7 @@ public class HttpInlinerSender extends QueueableSender {
 			String measuresAsString = inliner.inline(measures);
 
 			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("measurements being sent:\n{}", measuresAsString);
+				LOGGER.debug("Measures being sent:\n{}", measuresAsString);
 			}
 			wr.write(measuresAsString.getBytes(Miscellaneous.UTF8));
 
@@ -72,13 +72,13 @@ public class HttpInlinerSender extends QueueableSender {
 
 			switch (responseCode) {
 			case HttpURLConnection.HTTP_NO_CONTENT:
-				LOGGER.debug("{} measurements sent to {}://{}:{}", measures.size(), writeURL.getProtocol(), writeURL.getHost(), writeURL.getPort());
+				LOGGER.debug("{} Measures sent to {}://{}:{}", measures.size(), writeURL.getProtocol(), writeURL.getHost(), writeURL.getPort());
 				break;
 			case HttpURLConnection.HTTP_OK:
-				LOGGER.info("{} measurements sent to {}://{}:{} but not saved by infludb, reason:\n{}", measures.size(), writeURL.getProtocol(), writeURL.getHost(), writeURL.getPort(), Miscellaneous.readFrom(con.getInputStream()));
+				LOGGER.info("{} Measures sent to {}://{}:{} but not saved by infludb, reason:\n{}", measures.size(), writeURL.getProtocol(), writeURL.getHost(), writeURL.getPort(), Miscellaneous.readFrom(con.getInputStream()));
 				break;
 			default:
-				LOGGER.info("failed to send {} measurements to {}://{}:{}, HTTP CODE received: {}\n", measures.size(), writeURL.getProtocol(), writeURL.getHost(), writeURL.getPort(), responseCode,  Miscellaneous.readFrom(con.getInputStream()));
+				LOGGER.info("failed to send {} Measures to {}://{}:{}, HTTP CODE received: {}\n", measures.size(), writeURL.getProtocol(), writeURL.getHost(), writeURL.getPort(), responseCode,  Miscellaneous.readFrom(con.getInputStream()));
 				break;
 			}
 

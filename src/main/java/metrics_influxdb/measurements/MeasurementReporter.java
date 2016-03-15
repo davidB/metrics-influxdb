@@ -65,7 +65,7 @@ public class MeasurementReporter extends SkipIdleReporter {
 		sender.flush();
 	}
 
-	private Measurement fromTimer(String metricName, Timer t, long timestamp) {
+	private Measure fromTimer(String metricName, Timer t, long timestamp) {
 		Snapshot snapshot = t.getSnapshot();
 
 		Map<String, String> tags = new HashMap<String, String>(baseTags);
@@ -93,7 +93,7 @@ public class MeasurementReporter extends SkipIdleReporter {
 		return measure;
 	}
 
-	private Measurement fromMeter(String metricName, Meter mt, long timestamp) {
+	private Measure fromMeter(String metricName, Meter mt, long timestamp) {
 		Map<String, String> tags = new HashMap<String, String>(baseTags);
 		tags.putAll(transformer.tags(metricName));
 
@@ -108,7 +108,7 @@ public class MeasurementReporter extends SkipIdleReporter {
 		return measure;
 	}
 
-	private Measurement fromHistogram(String metricName, Histogram h, long timestamp) {
+	private Measure fromHistogram(String metricName, Histogram h, long timestamp) {
 		Snapshot snapshot = h.getSnapshot();
 
 		Map<String, String> tags = new HashMap<String, String>(baseTags);
@@ -131,7 +131,7 @@ public class MeasurementReporter extends SkipIdleReporter {
 		return measure;
 	}
 
-	private Measurement fromCounter(String metricName, Counter c, long timestamp) {
+	private Measure fromCounter(String metricName, Counter c, long timestamp) {
 		Map<String, String> tags = new HashMap<String, String>(baseTags);
 		tags.putAll(transformer.tags(metricName));
 
@@ -144,7 +144,7 @@ public class MeasurementReporter extends SkipIdleReporter {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private Measurement fromGauge(String metricName, Gauge g, long timestamp) {
+	private Measure fromGauge(String metricName, Gauge g, long timestamp) {
 		Map<String, String> tags = new HashMap<String, String>(baseTags);
 		tags.putAll(transformer.tags(metricName));
 

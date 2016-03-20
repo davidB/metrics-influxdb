@@ -100,3 +100,7 @@ bintray {
 	}
 }
 
+bintrayUpload.depensOn(test, assemble)
+bintrayUpload.onlyIf {
+	bintray_api_key.trim().length() > 0
+}

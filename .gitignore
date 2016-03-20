@@ -2,5 +2,7 @@
 .classpath
 .project
 .settings
+.gradle
 target
 bin
+build

@@ -1,0 +1,102 @@
+plugins {
+	id "java"
+	id "maven-publish"
+	id "eclipse"
+	id "org.dm.bundle" version "0.8.2"
+	id "nebula.provided-base" version "2.2.2"
+	id "com.jfrog.bintray" version "1.6"
+}
+
+group = "com.github.davidb"
+def description = "A reporter for metrics which announces measurements to an InfluxDB server."
+version = "git describe --always --dirty".execute().text.trim()
+println("version : '${version}'")
+
+repositories {
+	jcenter()
+}
+
+dependencies {
+	compile 'io.dropwizard.metrics:metrics-core:3.1.2'
+	compile 'org.slf4j:slf4j-api:1.7.7'
+
+	testCompile 'junit:junit:4.12'
+	testCompile 'org.hamcrest:hamcrest-all:1.3'
+	testCompile 'org.easytesting:fest-assert-core:2.0M10'
+	testCompile 'org.mockito:mockito-all:1.9.5'
+	testCompile 'org.slf4j:slf4j-simple:1.7.7'
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+task sourcesJar(type: Jar) {
+	from sourceSets.main.allSource
+	classifier = 'sources'
+}
+
+def pomConfig = {
+	url "https://github.com/davidB/${project.name}"
+	inceptionYear "2016"
+	licenses {
+		license {
+			name "Public domain (CC0-1.0)"
+			url "http://creativecommons.org/publicdomain/zero/1.0/"
+			distribution "repo"
+		}
+	}
+	developers {
+		developer {
+			id "davidB"
+			name "David Bernard"
+		}
+		developer {
+			id "McFoggy"
+			name "Matthieu Brouillard"
+			email "matthieu@brouillard.fr"
+		}
+	}
+}
+
+publishing {
+	publications {
+		mavenStuff(MavenPublication) {
+			from components.java
+			artifact sourcesJar
+			pom.withXml {
+				def root = asNode()
+				root.appendNode('description', description)
+				root.children().last() + pomConfig
+			}
+		}
+	}
+}
+bintray {
+	user = bintray_user
+	key = bintray_api_key
+
+	publications = ['mavenStuff'] //When uploading Maven-based publication files
+	//dryRun = false //Whether to run this as dry-run, without deploying
+	publish = true //If version should be auto published after an upload
+	pkg {
+		repo = 'maven'
+		name = project.name
+		desc = description
+		websiteUrl = "https://github.com/davidB/${project.name}"
+		issueTrackerUrl = "https://github.com/davidB/${project.name}/issues"
+		vcsUrl = "https://github.com/davidB/${project.name}.git"
+		licenses = ['CC0-1.0']
+		publicDownloadNumbers = true
+		version {
+			name = project.version
+			vcsTag = project.version
+			//attributes = []
+			//gpg {
+			//	sign = true //Determines whether to GPG sign the files. The default is false
+			//	passphrase = 'optional, the passphrase for GPG signing'
+			//}
+		}
+	}
+}
+

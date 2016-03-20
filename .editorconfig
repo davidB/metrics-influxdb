@@ -1,0 +1,65 @@
+# EditorConfig is awesome: http://EditorConfig.org
+
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = true
+tab_width = 2
+charset = utf-8
+
+# 4 space indentation
+[*.py]
+indent_style = space
+indent_size = 4
+
+# Tab indentation (no size specified)
+[Makefile]
+indent_style = tab
+
+[build.gradle]
+indent_style = tab
+
+# Matches the exact files either package.json or .travis.yml
+[{package.json,.travis.yml}]
+indent_style = space
+indent_size = 2
+
+[**.js]
+indent_style = tab
+indent_size = 2
+; Path to the external file format
+; The default is taken from the lib folder inside the folder extension.
+path=~/.vim/bundle/js-beautify/js/lib/beautify.js
+; Javascript interpreter to be invoked by default 'node'
+bin=node
+
+[**.json]
+indent_style = tab
+indent_size = 2
+
+[**.jsx]
+e4x = true
+indent_style = tab
+indent_size = 2
+
+[**.css]
+indent_style = tab
+indent_size = 2
+path=~/.vim/bundle/js-beautify/js/lib/beautify-css.js
+
+[**.html]
+indent_style = tab
+indent_size = 2
+max_char = 78
+brace_style = expand
+; Using special comments
+; And such comments or apply only in global configuration
+; So it's best to avoid them
+;vim:path=~/.vim/bundle/js-beautify/js/lib/beautify-html.js
+;vim:max_char=78:brace_style=expand
+

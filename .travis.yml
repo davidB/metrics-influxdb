@@ -1,4 +1,10 @@
 sudo: false
 language: java
+env:
+ - GRADLE_USER_HOME=gradle-cache
+cache:
+  directories:
+   - gradle-cache
+   - netbeans
 jdk:
   - oraclejdk8

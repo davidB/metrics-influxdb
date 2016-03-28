@@ -35,6 +35,15 @@ task sourcesJar(type: Jar) {
 	from sourceSets.main.allSource
 	classifier = 'sources'
 }
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	from javadoc.destinationDir
+	classifier = 'javadoc'
+}
+
+// add javadoc/source jar tasks as artifacts
+artifacts {
+	archives sourcesJar, javadocJar
+}
 
 def pomConfig = {
 	url "https://github.com/davidB/${project.name}"
@@ -45,6 +54,11 @@ def pomConfig = {
 			url "http://creativecommons.org/publicdomain/zero/1.0/"
 			distribution "repo"
 		}
+	}
+	scm {
+		connection "scm:git:git://github.com/davidB/${project.name}.git"
+		developerConnection "scm:git:git@github.com:davidB/${project.name}.git"
+		url "https://github.com/davidB/${project.name}/"
 	}
 	developers {
 		developer {
@@ -64,6 +78,7 @@ publishing {
 		mavenStuff(MavenPublication) {
 			from components.java
 			artifact sourcesJar
+			artifact javadocJar
 			pom.withXml {
 				def root = asNode()
 				root.appendNode('description', description)

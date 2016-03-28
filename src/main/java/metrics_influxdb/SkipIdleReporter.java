@@ -14,7 +14,7 @@ import com.codahale.metrics.ScheduledReporter;
 
 public abstract class SkipIdleReporter extends ScheduledReporter {
     private final static Logger LOGGER = LoggerFactory.getLogger(SkipIdleReporter.class);
-    
+
     protected final boolean skipIdleMetrics;
     protected final Map<String, Long> previousValues;
 
@@ -27,8 +27,6 @@ public abstract class SkipIdleReporter extends ScheduledReporter {
     /**
      * Returns true if this metric is idle and should be skipped.
      *
-     * @param name
-     * @param counting
      * @return true if the metric should be skipped
      */
     protected boolean canSkipMetric(String name, Counting counting) {

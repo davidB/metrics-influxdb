@@ -57,7 +57,7 @@ public class InfluxdbHttp implements Influxdb {
 	}
 
 	public final URL url;
-	/** true => to print Json on System.err */
+	/** if true then print Json on System.err */
 	public boolean debugJson = false;
 	public JsonBuilder jsonBuilder = new JsonBuilderDefault();
 	/**

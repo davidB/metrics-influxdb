@@ -100,7 +100,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
 		private TimeUnit durationUnit;
 		private MetricFilter filter;
 		private boolean skipIdleMetrics;
-		
+
         @VisibilityIncreasedForTests InfluxDBCompatibilityVersions influxdbVersion;
         @VisibilityIncreasedForTests InfluxdbProtocol protocol;
         @VisibilityIncreasedForTests Influxdb influxdbDelegate;
@@ -206,7 +206,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
 
         public ScheduledReporter build() {
             ScheduledReporter reporter;
-            
+
             switch (influxdbVersion) {
             case V08:
                 reporter = new InfluxdbReporter(registry, influxdbDelegate, clock, prefix, rateUnit, durationUnit, filter, skipIdleMetrics);
@@ -228,7 +228,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
         }
 
         /**
-         * Operates with influxdb version <= 08. 
+         * Operates with influxdb version less or equal to 08.
          * @param delegate the influxdb delegate to use, cannot be null
          * @return the builder itself
          */
@@ -346,7 +346,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
 
 	private InfluxdbReporter(MetricRegistry registry, MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit) {
 	    super(registry, "influxdb-reporter", filter, rateUnit, durationUnit, true);
-	    
+
         this.influxdb = null;
         this.clock = null;
         this.prefix = "";

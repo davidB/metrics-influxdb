@@ -23,7 +23,7 @@ public class UDPInlinerSender extends QueueableSender {
     public UDPInlinerSender(UDPInfluxdbProtocol protocol) {
         super(MAX_MEASURES_IN_SINGLE_POST);
         inliner = new Inliner();
-        serverAddress = new InetSocketAddress(protocol.getHost(), protocol.getPort());
+        serverAddress = new InetSocketAddress(protocol.host, protocol.port);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class UDPInlinerSender extends QueueableSender {
         if (measures.isEmpty()) {
             return true;
         }
-        
+
         DatagramChannel channel = null;
         try {
             channel = DatagramChannel.open();

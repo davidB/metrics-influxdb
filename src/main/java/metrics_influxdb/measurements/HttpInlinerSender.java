@@ -25,20 +25,20 @@ public class HttpInlinerSender extends QueueableSender {
     public HttpInlinerSender(HttpInfluxdbProtocol protocol) {
         super(MAX_MEASURES_IN_SINGLE_POST);
         URL toJoin;
-        
+
         inliner = new Inliner();
 
         try {
-            if (protocol.isSecured()) {
-                toJoin = new URL("http", protocol.getHost(), protocol.getPort(), "/write?precision=ms&db=" + Miscellaneous.urlEncode(protocol.getDatabase()) + "&u="
-                        + Miscellaneous.urlEncode(protocol.getUser()) + "&p=" + Miscellaneous.urlEncode(protocol.getPassword()));
+            if (protocol.secured) {
+                toJoin = new URL("http", protocol.host, protocol.port, "/write?precision=ms&db=" + Miscellaneous.urlEncode(protocol.database) + "&u="
+                        + Miscellaneous.urlEncode(protocol.user) + "&p=" + Miscellaneous.urlEncode(protocol.password));
             } else {
-                toJoin = new URL("http", protocol.getHost(), protocol.getPort(), "/write?precision=ms&db=" + Miscellaneous.urlEncode(protocol.getDatabase()));
+                toJoin = new URL("http", protocol.host, protocol.port, "/write?precision=ms&db=" + Miscellaneous.urlEncode(protocol.database));
             }
         } catch (MalformedURLException | UnsupportedEncodingException e) {
             toJoin = null;
         }
-        
+
         writeURL = toJoin;
     }
 
@@ -47,27 +47,27 @@ public class HttpInlinerSender extends QueueableSender {
         if (measures.isEmpty()) {
             return true;
         }
-        
+
         HttpURLConnection con = null;
         try {
             con = (HttpURLConnection) writeURL.openConnection();
             con.setRequestMethod("POST");
             con.setConnectTimeout(Long.valueOf(TimeUnit.SECONDS.toMillis(2)).intValue());
             con.setReadTimeout(Long.valueOf(TimeUnit.SECONDS.toMillis(2)).intValue());
-            
+
             // Send post request
             con.setDoOutput(true);
             OutputStream wr = con.getOutputStream();
             String measuresAsString = inliner.inline(measures);
-            
+
             if (LOGGER.isDebugEnabled()) {
             	LOGGER.debug("measurements being sent:\n{}", measuresAsString);
             }
             wr.write(measuresAsString.getBytes(Miscellaneous.UTF8));
-            
+
             wr.flush();
             wr.close();
-            
+
             int responseCode = con.getResponseCode();
 
             switch (responseCode) {
@@ -81,7 +81,7 @@ public class HttpInlinerSender extends QueueableSender {
                 LOGGER.info("failed to send {} measurements to {}://{}:{}, HTTP CODE received: {}\n", measures.size(), writeURL.getProtocol(), writeURL.getHost(), writeURL.getPort(), responseCode,  Miscellaneous.readFrom(con.getInputStream()));
                 break;
             }
-            
+
             return true;
         } catch (IOException e) {
             // Here the influxdb is potentially temporary unreachable
@@ -97,7 +97,7 @@ public class HttpInlinerSender extends QueueableSender {
                 }
             }
         }
-        
+
         return false;
     }
 }

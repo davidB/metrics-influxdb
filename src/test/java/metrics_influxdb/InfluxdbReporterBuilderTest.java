@@ -123,7 +123,7 @@ public class InfluxdbReporterBuilderTest {
     public void builder_api_with_tags_checksNullKey() {
         String tagValue = "tag-value";
 
-        Builder builder = InfluxdbReporter
+        InfluxdbReporter
                 .forRegistry(registry)
                 .tag(null, tagValue);
     }
@@ -132,7 +132,7 @@ public class InfluxdbReporterBuilderTest {
     public void builder_api_with_tags_checksNullValue() {
         String tagKey = "tag-name";
 
-        Builder builder = InfluxdbReporter
+        InfluxdbReporter
                 .forRegistry(registry)
                 .tag(tagKey, null);
     }
@@ -141,7 +141,7 @@ public class InfluxdbReporterBuilderTest {
     public void builder_api_with_tags_checksEmptyKey() {
         String tagValue = "tag-value";
 
-        Builder builder = InfluxdbReporter
+        InfluxdbReporter
                 .forRegistry(registry)
                 .tag("", tagValue);
     }
@@ -150,7 +150,7 @@ public class InfluxdbReporterBuilderTest {
     public void builder_api_with_tags_checksEmptyValue() {
         String tagKey = "tag-name";
 
-        Builder builder = InfluxdbReporter
+        InfluxdbReporter
                 .forRegistry(registry)
                 .tag(tagKey, "");
     }

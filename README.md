@@ -14,6 +14,7 @@
 
 [![Build Status](https://travis-ci.org/davidB/metrics-influxdb.svg?branch=master)](https://travis-ci.org/davidB/metrics-influxdb)
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/davidB/metrics-influxdb/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[![Download](https://api.bintray.com/packages/davidb/maven/metrics-influxdb/images/download.svg) ](https://bintray.com/davidb/maven/metrics-influxdb/_latestVersion)
 
 # The library provide :
 
@@ -28,12 +29,21 @@ The library provide a lighter client than influxdb-java to push only metrics.
 * metrics-core, to provide, if you use InfluxdbReporter.
 
 ## Install:
+
+### Released
+```
+ dependencies {
+	compile 'com.github.davidb:metrics-influxdb:0.8.2'
+ }
+```
+
+### Dev
 ```
  repositories {
-        maven { url "https://jitpack.io" }
+    maven { url "https://jitpack.io" }
  }
  dependencies {
-	        compile 'com.github.davidb:metrics-influxdb:-SNAPSHOT'
+	compile 'com.github.davidb:metrics-influxdb:-SNAPSHOT'
  }
 ```
 ## Usage :

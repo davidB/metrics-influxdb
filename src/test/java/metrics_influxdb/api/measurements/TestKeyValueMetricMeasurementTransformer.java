@@ -4,22 +4,16 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TestKeyValueMetricMeasurementTransformer {
-	private KeyValueMetricMeasurementTransformer keyValueTransformer;
-
-	@Before
-	public void init() {
-		keyValueTransformer = new KeyValueMetricMeasurementTransformer();
-	}
+	private KeyValueMetricMeasurementTransformer keyValueTransformer = new KeyValueMetricMeasurementTransformer();
 
 	@Test
 	public void aSimpleMetricGeneratesEmptyTags() {

@@ -5,13 +5,15 @@ import static metrics_influxdb.SortedMaps.singleton;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.codahale.metrics.Clock;
 import com.codahale.metrics.Counter;
@@ -30,7 +32,7 @@ public class MeasurementReporterTest {
 	private MetricRegistry registry;
 	private MeasurementReporter reporter;
 
-	@Before
+	@BeforeMethod
 	public void init() {
 		sender = new ListInlinerSender(100);
 		registry = new MetricRegistry();

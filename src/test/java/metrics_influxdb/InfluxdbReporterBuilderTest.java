@@ -4,13 +4,13 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import org.mockito.Mockito;
 
 import com.codahale.metrics.MetricRegistry;
@@ -21,12 +21,7 @@ import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
 import metrics_influxdb.api.protocols.HttpInfluxdbProtocol;
 
 public class InfluxdbReporterBuilderTest {
-	private MetricRegistry registry;
-
-	@Before
-	public void init() {
-		registry = new MetricRegistry();
-	}
+	private MetricRegistry registry = new MetricRegistry();
 
 	@Test
 	public void builder_api_with_default_values() {
@@ -118,7 +113,7 @@ public class InfluxdbReporterBuilderTest {
 		assertThat(reporter, notNullValue());
 	}
 
-	@Test(expected=NullPointerException.class)
+	@Test(expectedExceptions=NullPointerException.class)
 	public void builder_api_with_tags_checksNullKey() {
 		String tagValue = "tag-value";
 
@@ -127,7 +122,7 @@ public class InfluxdbReporterBuilderTest {
 				.tag(null, tagValue);
 	}
 
-	@Test(expected=NullPointerException.class)
+	@Test(expectedExceptions=NullPointerException.class)
 	public void builder_api_with_tags_checksNullValue() {
 		String tagKey = "tag-name";
 
@@ -136,7 +131,7 @@ public class InfluxdbReporterBuilderTest {
 				.tag(tagKey, null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expectedExceptions=IllegalArgumentException.class)
 	public void builder_api_with_tags_checksEmptyKey() {
 		String tagValue = "tag-value";
 
@@ -145,7 +140,7 @@ public class InfluxdbReporterBuilderTest {
 				.tag("", tagValue);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expectedExceptions=IllegalArgumentException.class)
 	public void builder_api_with_tags_checksEmptyValue() {
 		String tagKey = "tag-name";
 

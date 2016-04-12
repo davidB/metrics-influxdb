@@ -7,13 +7,13 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.hamcrest.collection.IsMapContaining.hasValue;
-import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TestCategoriesMetricMeasurementTransformer {
 	@Test

@@ -5,8 +5,6 @@ import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,19 +12,15 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import metrics_influxdb.measurements.Measure;
 import metrics_influxdb.serialization.line.Inliner;
 
 public class InlinerTest {
-	private Inliner inliner;
-
-	@Before
-	public void init() {
-		inliner = new Inliner();
-	}
+	private Inliner inliner = new Inliner();
 
 	@Test
 	public void a_single_word_name_is_untouched() {

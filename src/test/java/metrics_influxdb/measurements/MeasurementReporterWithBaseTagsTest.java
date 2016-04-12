@@ -5,14 +5,13 @@ import static metrics_influxdb.SortedMaps.singleton;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.codahale.metrics.Clock;
 import com.codahale.metrics.Counter;
@@ -21,14 +20,8 @@ import com.codahale.metrics.MetricRegistry;
 import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
 
 public class MeasurementReporterWithBaseTagsTest {
-	private ListInlinerSender sender;
-	private MetricRegistry registry;
-
-	@Before
-	public void init() {
-		sender = new ListInlinerSender(100);
-		registry = new MetricRegistry();
-	}
+	private ListInlinerSender sender = new ListInlinerSender(100);
+	private MetricRegistry registry = new MetricRegistry();
 
 	@Test
 	public void generatedMeasurementContainsBaseTags() {

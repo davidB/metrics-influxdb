@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * This transformer uses a provided list of categories in order to extract tag values from the given metrics name.
  * Each metric name is splitted, and each splitted string falls into a given category bucket.
- * <br/>
+ * <br>
  * Example using the categories ["server", "type"] a metric called `actarus.production.cpu_load` will be turned into
  * a measurement:
  * <pre>

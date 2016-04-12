@@ -198,7 +198,7 @@ public class InfluxdbReporter  {
 		}
 
 		/**
-		 * Operates with influxdb version <= 08. 
+		 * Operates with influxdb version less or equal than 08. 
 		 * @param delegate the influxdb delegate to use, cannot be null
 		 * @return the builder itself
 		 */

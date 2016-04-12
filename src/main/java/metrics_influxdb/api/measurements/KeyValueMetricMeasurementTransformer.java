@@ -11,7 +11,7 @@ import java.util.Map;
  * 
  * If when splitting the initial metric name using the '.' character, the number of strings is not even, then the last 2 strings will be used to generate
  * the measurement-name.
- * <br />
+ * <br>
  *  Examples:
  *  <ul>
  *  <li>`server.actarus.cpu_load` will be transformed to a measurement called `cpu_load` with tags [[server=actarus]]</li>

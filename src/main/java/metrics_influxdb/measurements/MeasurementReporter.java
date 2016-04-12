@@ -3,6 +3,7 @@ package metrics_influxdb.measurements;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.codahale.metrics.Clock;
@@ -12,20 +13,28 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 
-import metrics_influxdb.SkipIdleReporter;
 import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
 
-public class MeasurementReporter extends SkipIdleReporter {
+public class MeasurementReporter extends ScheduledReporter{
 	private final Sender sender;
 	private final Clock clock;
 	private Map<String, String> baseTags;
 	private MetricMeasurementTransformer transformer;
 
-	public MeasurementReporter(Sender sender, MetricRegistry registry, MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit, boolean skipIdleMetrics, Clock clock, Map<String, String> baseTags, MetricMeasurementTransformer transformer) {
-		super(registry, "measurement-reporter", filter, rateUnit, durationUnit, skipIdleMetrics);
+	public MeasurementReporter(Sender sender, MetricRegistry registry, MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit, Clock clock, Map<String, String> baseTags, MetricMeasurementTransformer transformer, ScheduledExecutorService executor) {
+		super(registry, "measurement-reporter", filter, rateUnit, durationUnit, executor);
+		this.baseTags = baseTags;
+		this.sender = sender;
+		this.clock = clock;
+		this.transformer = transformer;
+	}
+
+	public MeasurementReporter(Sender sender, MetricRegistry registry, MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit, Clock clock, Map<String, String> baseTags, MetricMeasurementTransformer transformer) {
+		super(registry, "measurement-reporter", filter, rateUnit, durationUnit);
 		this.baseTags = baseTags;
 		this.sender = sender;
 		this.clock = clock;

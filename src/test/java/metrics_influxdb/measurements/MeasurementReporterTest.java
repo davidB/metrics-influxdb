@@ -34,7 +34,7 @@ public class MeasurementReporterTest {
 	public void init() {
 		sender = new ListInlinerSender(100);
 		registry = new MetricRegistry();
-		reporter = new MeasurementReporter(sender, registry, null, TimeUnit.SECONDS, TimeUnit.MILLISECONDS, true, Clock.defaultClock(), Collections.emptyMap(), MetricMeasurementTransformer.NOOP);
+		reporter = new MeasurementReporter(sender, registry, null, TimeUnit.SECONDS, TimeUnit.MILLISECONDS, Clock.defaultClock(), Collections.emptyMap(), MetricMeasurementTransformer.NOOP);
 	}
 
 	@Test

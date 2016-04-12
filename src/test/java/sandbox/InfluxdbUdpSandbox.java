@@ -5,6 +5,7 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import metrics_influxdb.InfluxdbReporter;
 import metrics_influxdb.InfluxdbUdp;
+import metrics_influxdb.ReporterV08;
 
 import java.util.concurrent.TimeUnit;
 
@@ -14,7 +15,7 @@ public class InfluxdbUdpSandbox {
 	private static final String ENV_REGISTRY_PREFIX = "REGISTRY_PREFIX";
 
 	public static void main(String[] args) {
-		InfluxdbReporter reporter = null;
+		ReporterV08 reporter = null;
 		try {
 			final MetricRegistry registry = new MetricRegistry();
 			reporter = getInfluxdbReporter(registry);
@@ -35,11 +36,11 @@ public class InfluxdbUdpSandbox {
 		}
 	}
 
-	private static InfluxdbReporter getInfluxdbReporter(MetricRegistry registry) throws Exception {
+	private static ReporterV08 getInfluxdbReporter(MetricRegistry registry) throws Exception {
 		final InfluxdbUdp influxdb = new InfluxdbUdp(
 				getEnv(ENV_INFLUX_HOST),
 				Integer.parseInt(getEnv(ENV_INFLUX_PORT)));
-		return InfluxdbReporter
+		return (ReporterV08) InfluxdbReporter
 				.forRegistry(registry)
 				.prefixedWith(getEnv(ENV_REGISTRY_PREFIX, "test"))
 				.convertRatesTo(TimeUnit.SECONDS)

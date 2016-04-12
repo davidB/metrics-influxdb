@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import metrics_influxdb.InfluxdbHttp;
 import metrics_influxdb.InfluxdbReporter;
+import metrics_influxdb.ReporterV08;
 
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Gauge;
@@ -70,10 +71,10 @@ public class SendToLocalInfluxDB {
 		}
 	}
 
-	private static InfluxdbReporter startInfluxdbReporter(MetricRegistry registry) throws Exception {
+	private static ReporterV08 startInfluxdbReporter(MetricRegistry registry) throws Exception {
 		final InfluxdbHttp influxdb = new InfluxdbHttp("127.0.0.1", 8086, "test", "u0", "u0PWD");
 		//influxdb.debugJson = true;
-		final InfluxdbReporter reporter = InfluxdbReporter
+		final ReporterV08 reporter = (ReporterV08) InfluxdbReporter
 				.forRegistry(registry)
 				.prefixedWith("test")
 				.convertRatesTo(TimeUnit.SECONDS)

@@ -53,6 +53,10 @@ public class SendToLocalInfluxDB_V09 {
 			exc.printStackTrace();
 			System.exit(1);
 		} finally {
+			if (r2 != null) {
+				r2.report();
+				r2.stop();
+			}
 			if (r1 != null) {
 				r1.report();
 				r1.stop();

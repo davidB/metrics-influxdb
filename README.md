@@ -67,35 +67,29 @@ With the previous simple configuration, all defaults will be used, mainly:
 - ...
 
 But you are free of course to define all settings by yourself :
+```
+final ScheduledReporter reporter = InfluxdbReporter.forRegistry(registry)
+    .protocol(new HttpInfluxdbProtocol("influxdb-server", 8086, "admin", "53CR3TP455W0RD", "metrics"))
+    .convertRatesTo(TimeUnit.SECONDS)
+    .convertDurationsTo(TimeUnit.MILLISECONDS)
+    .filter(MetricFilter.ALL)
+    .skipIdleMetrics(false)
+    .tag("cluster", "CL01")
+    .tag("client", "OurImportantClient")
+    .tag("server", serverIP)
+    .transformer(new CategoriesMetricMeasurementTransformer("module", "artifact"))
+    .build();
+reporter.start(10, TimeUnit.SECONDS);
+```
 
-    final ScheduledReporter reporter = InfluxdbReporter.forRegistry(registry)
-        .protocol(InfluxdbProtocols.http("influxdb-server", 8086, "admin", "53CR3TP455W0RD", "metrics"))
-        .convertRatesTo(TimeUnit.SECONDS)
-        .convertDurationsTo(TimeUnit.MILLISECONDS)
-        .filter(MetricFilter.ALL)
-        .skipIdleMetrics(false)
-        .tag("cluster", "CL01")
-        .tag("client", "OurImportantClient")
-        .tag("server", serverIP)
-        .transformer(new CategoriesMetricMeasurementTransformer("module", "artifact"))
-        .build();
-    reporter.start(10, TimeUnit.SECONDS);
+And if you are still using v08 influxdb
 
-And if you are still using v08 influxdb you can use the deprecated old syntax as before
-
-    final InfluxdbHttp influxdb = new InfluxdbHttp("127.0.0.1", 8086, "dev", "u0", "u0PWD");
-    final InfluxdbReporter reporter = InfluxdbReporter
-        .forRegistry(registry)
-        .build(influxdb);
-    ...
-    
-or the new one
-
-    final InfluxdbHttp influxdb = new InfluxdbHttp("127.0.0.1", 8086, "dev", "u0", "u0PWD");
-    final InfluxdbReporter reporter = InfluxdbReporter
-        .forRegistry(registry)
-        .v08(influxdb)
-        .build();
-    ...
-
+```
+final InfluxdbReporter reporter = InfluxdbReporter
+    .forRegistry(registry)
+    .protocol(new HttpInfluxdbProtocol("influxdb-server", 8086, "admin", "53CR3TP455W0RD", "metrics"))
+    .v08()
+    .build();
+...
+```
 

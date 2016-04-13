@@ -11,14 +11,11 @@ import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.mockito.Mockito;
-
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 
 import metrics_influxdb.InfluxdbReporter.Builder;
 import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
-import metrics_influxdb.api.protocols.HttpInfluxdbProtocol;
 
 public class InfluxdbReporterBuilderTest {
 	private MetricRegistry registry = new MetricRegistry();
@@ -46,17 +43,17 @@ public class InfluxdbReporterBuilderTest {
 		assertFalse(httpProtocol.secured);
 
 		// other defaults
-		assertThat(builder.influxdbVersion, is(InfluxDBCompatibilityVersions.LATEST));
+		assertThat(builder.influxdbVersion, is(InfluxdbReporter.InfluxdbCompatibilityVersions.LATEST));
 		assertThat(builder.transformer, is(MetricMeasurementTransformer.NOOP));
 	}
 
 	@Test
 	public void builder_api_with_compatibility_v08() {
-		Influxdb influxdbMock = Mockito.mock(Influxdb.class);
 		ScheduledReporter reporter = 
 				InfluxdbReporter
 				.forRegistry(registry)
-				.v08(influxdbMock)
+				.protocol(new HttpInfluxdbProtocol("127.0.0.1", 8086, "u0", "u0PWD", "test"))
+				.v08()
 				.build();
 
 		assertThat(reporter, notNullValue());

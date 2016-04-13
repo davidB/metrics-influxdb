@@ -1,4 +1,4 @@
-package metrics_influxdb.api.protocols;
+package metrics_influxdb;
 
 public class HttpInfluxdbProtocol implements InfluxdbProtocol {
 	public final static String DEFAULT_HOST = "127.0.0.1";

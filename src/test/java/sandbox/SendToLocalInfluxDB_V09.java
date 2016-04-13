@@ -21,9 +21,9 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 
+import metrics_influxdb.HttpInfluxdbProtocol;
 import metrics_influxdb.InfluxdbReporter;
-import metrics_influxdb.api.protocols.HttpInfluxdbProtocol;
-import metrics_influxdb.api.protocols.UDPInfluxdbProtocol;
+import metrics_influxdb.UdpInfluxdbProtocol;
 
 public class SendToLocalInfluxDB_V09 {
 
@@ -74,7 +74,7 @@ public class SendToLocalInfluxDB_V09 {
 				.convertRatesTo(TimeUnit.SECONDS)
 				.convertDurationsTo(TimeUnit.MILLISECONDS)
 				.filter(MetricFilter.ALL)
-				.protocol(new UDPInfluxdbProtocol("127.0.0.1", 8089))
+				.protocol(new UdpInfluxdbProtocol("127.0.0.1", 8089))
 				.build();
 		reporter.start(20, TimeUnit.SECONDS);
 		return reporter;

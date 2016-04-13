@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import metrics_influxdb.api.protocols.HttpInfluxdbProtocol;
+import metrics_influxdb.HttpInfluxdbProtocol;
 import metrics_influxdb.misc.Miscellaneous;
 import metrics_influxdb.serialization.line.Inliner;
 

@@ -24,15 +24,16 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 
 import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
-import metrics_influxdb.api.protocols.HttpInfluxdbProtocol;
-import metrics_influxdb.api.protocols.InfluxdbProtocol;
-import metrics_influxdb.api.protocols.UDPInfluxdbProtocol;
 import metrics_influxdb.measurements.HttpInlinerSender;
 import metrics_influxdb.measurements.MeasurementReporter;
 import metrics_influxdb.measurements.Sender;
-import metrics_influxdb.measurements.UDPInlinerSender;
+import metrics_influxdb.measurements.UdpInlinerSender;
 import metrics_influxdb.misc.Miscellaneous;
 import metrics_influxdb.misc.VisibilityIncreasedForTests;
+import metrics_influxdb.v08.Influxdb;
+import metrics_influxdb.v08.InfluxdbHttp;
+import metrics_influxdb.v08.InfluxdbUdp;
+import metrics_influxdb.v08.ReporterV08;
 
 /**
  * A reporter which publishes metric values to a InfluxDB server.
@@ -41,6 +42,10 @@ import metrics_influxdb.misc.VisibilityIncreasedForTests;
  *      time series database with no external dependencies.</a>
  */
 public class InfluxdbReporter  {
+
+	static enum InfluxdbCompatibilityVersions {
+		V08, LATEST;
+	}
 
 	/**
 	 * Returns a new {@link Builder} for {@link InfluxdbReporter}.
@@ -59,6 +64,7 @@ public class InfluxdbReporter  {
 	 * converting durations to milliseconds, and not filtering metrics.
 	 */
 	public static class Builder {
+
 		private final MetricRegistry registry;
 		private Clock clock;
 		private String prefix;
@@ -68,7 +74,7 @@ public class InfluxdbReporter  {
 		private boolean skipIdleMetrics;
 		private ScheduledExecutorService executor;
 
-		@VisibilityIncreasedForTests InfluxDBCompatibilityVersions influxdbVersion;
+		@VisibilityIncreasedForTests InfluxdbCompatibilityVersions influxdbVersion;
 		@VisibilityIncreasedForTests InfluxdbProtocol protocol;
 		@VisibilityIncreasedForTests Influxdb influxdbDelegate;
 		@VisibilityIncreasedForTests Map<String, String> tags;
@@ -82,7 +88,7 @@ public class InfluxdbReporter  {
 			this.durationUnit = TimeUnit.MILLISECONDS;
 			this.filter = MetricFilter.ALL;
 			this.protocol = new HttpInfluxdbProtocol();
-			this.influxdbVersion = InfluxDBCompatibilityVersions.LATEST;
+			this.influxdbVersion = InfluxdbCompatibilityVersions.LATEST;
 			this.tags = new HashMap<>();
 		}
 
@@ -158,37 +164,24 @@ public class InfluxdbReporter  {
 		}
 
 		/**
-		 * Builds a {@link InfluxdbReporter} with the given properties, sending
-		 * metrics using the given {@link Influxdb} client.
+		 * Builds a {@link ScheduledReporter} with the given properties, sending
+		 * metrics using the given InfluxDB.
 		 *
-		 * @param influxdb a {@link Influxdb} client
-		 * @return a {@link InfluxdbReporter}
+		 * @return a {@link ScheduledReporter}
 		 */
-		public ScheduledReporter build(Influxdb influxdb) {
-			return executor == null
-					? new ReporterV08(registry, influxdb, clock, prefix, rateUnit, durationUnit, filter, skipIdleMetrics)
-					: new ReporterV08(registry, influxdb, clock, prefix, rateUnit, durationUnit, filter, skipIdleMetrics, executor)
-					;
-		}
-
 		public ScheduledReporter build() {
 			ScheduledReporter reporter;
 
 			switch (influxdbVersion) {
 			case V08:
-				reporter = build(influxdbDelegate);
+				Influxdb influxdb = buildInfluxdb();
+				reporter = (executor == null)
+						? new ReporterV08(registry, influxdb, clock, prefix, rateUnit, durationUnit, filter, skipIdleMetrics)
+						: new ReporterV08(registry, influxdb, clock, prefix, rateUnit, durationUnit, filter, skipIdleMetrics, executor)
+						;
 				break;
 			default:
-				Sender s = null;
-				if (protocol instanceof HttpInfluxdbProtocol) {
-					s = new HttpInlinerSender((HttpInfluxdbProtocol) protocol);
-					// TODO allow registration of transformers
-					// TODO evaluate need of prefix (vs tags)
-				} else if (protocol instanceof UDPInfluxdbProtocol) {
-					s = new UDPInlinerSender((UDPInfluxdbProtocol) protocol);
-				} else {
-					throw new IllegalStateException("unsupported protocol: " + protocol);
-				}
+				Sender s = buildSender();
 				reporter = executor == null
 						? new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, clock, tags, transformer)
 						: new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, clock, tags, transformer, executor)
@@ -199,13 +192,10 @@ public class InfluxdbReporter  {
 
 		/**
 		 * Operates with influxdb version less or equal than 08. 
-		 * @param delegate the influxdb delegate to use, cannot be null
 		 * @return the builder itself
 		 */
-		public Builder v08(Influxdb delegate) {
-			Objects.requireNonNull(delegate, "given Influxdb cannot be null");
-			this.influxdbVersion  = InfluxDBCompatibilityVersions.V08;
-			this.influxdbDelegate = delegate;
+		public Builder v08() {
+			this.influxdbVersion  = InfluxdbCompatibilityVersions.V08;
 			return this;
 		}
 
@@ -241,6 +231,38 @@ public class InfluxdbReporter  {
 			Miscellaneous.requireNotEmptyParameter(tagValue, "value");
 			tags.put(tagKey, tagValue);
 			return this;
+		}
+
+		private Influxdb buildInfluxdb() {
+			if (protocol instanceof HttpInfluxdbProtocol) {
+				try {
+					HttpInfluxdbProtocol p = (HttpInfluxdbProtocol) protocol;
+					return new InfluxdbHttp(p.host, p.port, p.database, p.user, p.password, durationUnit);
+				} catch(RuntimeException exc) {
+					throw exc;
+				} catch(Exception exc) {
+					// wrap exception into RuntimeException
+					throw new RuntimeException(exc.getMessage(), exc);
+				}
+			} else if (protocol instanceof UdpInfluxdbProtocol) {
+				UdpInfluxdbProtocol p = (UdpInfluxdbProtocol) protocol;
+				return new InfluxdbUdp(p.host, p.port);
+			} else {
+				throw new IllegalStateException("unsupported protocol: " + protocol);
+			}
+		}
+
+		private Sender buildSender() {
+			if (protocol instanceof HttpInfluxdbProtocol) {
+				return new HttpInlinerSender((HttpInfluxdbProtocol) protocol);
+				// TODO allow registration of transformers
+				// TODO evaluate need of prefix (vs tags)
+			} else if (protocol instanceof UdpInfluxdbProtocol) {
+				return new UdpInlinerSender((UdpInfluxdbProtocol) protocol);
+			} else {
+				throw new IllegalStateException("unsupported protocol: " + protocol);
+			}
+
 		}
 	}
 }

@@ -10,7 +10,7 @@
 //
 //	You should have received a copy of the CC0 Public Domain Dedication along with
 //	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
-package metrics_influxdb;
+package metrics_influxdb.v08;
 
 import java.util.Map;
 import java.util.SortedMap;
@@ -124,7 +124,7 @@ public class ReporterV08 extends ScheduledReporter {
 	protected final boolean skipIdleMetrics;
 	protected final Map<String, Long> previousValues;
 
-	ReporterV08(MetricRegistry registry,
+	public ReporterV08(MetricRegistry registry,
 			Influxdb influxdb,
 			Clock clock,
 			String prefix,
@@ -141,7 +141,7 @@ public class ReporterV08 extends ScheduledReporter {
 		this.prefix = (prefix == null) ? "" : (prefix.trim() + ".");
 	}
 
-	ReporterV08(MetricRegistry registry,
+	public ReporterV08(MetricRegistry registry,
 			Influxdb influxdb,
 			Clock clock,
 			String prefix,

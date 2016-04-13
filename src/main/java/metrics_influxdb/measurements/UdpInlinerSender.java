@@ -11,17 +11,17 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import metrics_influxdb.api.protocols.UDPInfluxdbProtocol;
+import metrics_influxdb.UdpInfluxdbProtocol;
 import metrics_influxdb.misc.Miscellaneous;
 import metrics_influxdb.serialization.line.Inliner;
 
-public class UDPInlinerSender extends QueueableSender {
-	private final static Logger LOGGER = LoggerFactory.getLogger(UDPInlinerSender.class);
+public class UdpInlinerSender extends QueueableSender {
+	private final static Logger LOGGER = LoggerFactory.getLogger(UdpInlinerSender.class);
 	private static int MAX_MEASURES_IN_SINGLE_POST = 5000;
 	private final Inliner inliner;
 	private final InetSocketAddress serverAddress;
 
-	public UDPInlinerSender(UDPInfluxdbProtocol protocol) {
+	public UdpInlinerSender(UdpInfluxdbProtocol protocol) {
 		super(MAX_MEASURES_IN_SINGLE_POST);
 		inliner = new Inliner(TimeUnit.NANOSECONDS);
 		serverAddress = new InetSocketAddress(protocol.host, protocol.port);

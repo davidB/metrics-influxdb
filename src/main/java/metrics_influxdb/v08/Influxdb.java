@@ -1,4 +1,4 @@
-package metrics_influxdb;
+package metrics_influxdb.v08;
 
 public interface Influxdb {
 	public void resetRequest();

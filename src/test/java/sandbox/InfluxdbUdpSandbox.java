@@ -4,8 +4,8 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import metrics_influxdb.InfluxdbReporter;
-import metrics_influxdb.InfluxdbUdp;
-import metrics_influxdb.ReporterV08;
+import metrics_influxdb.UdpInfluxdbProtocol;
+import metrics_influxdb.v08.ReporterV08;
 
 import java.util.concurrent.TimeUnit;
 
@@ -37,16 +37,14 @@ public class InfluxdbUdpSandbox {
 	}
 
 	private static ReporterV08 getInfluxdbReporter(MetricRegistry registry) throws Exception {
-		final InfluxdbUdp influxdb = new InfluxdbUdp(
-				getEnv(ENV_INFLUX_HOST),
-				Integer.parseInt(getEnv(ENV_INFLUX_PORT)));
 		return (ReporterV08) InfluxdbReporter
 				.forRegistry(registry)
+				.protocol(new UdpInfluxdbProtocol(getEnv(ENV_INFLUX_HOST), Integer.parseInt(getEnv(ENV_INFLUX_PORT))))
 				.prefixedWith(getEnv(ENV_REGISTRY_PREFIX, "test"))
 				.convertRatesTo(TimeUnit.SECONDS)
 				.convertDurationsTo(TimeUnit.MILLISECONDS)
 				.filter(MetricFilter.ALL)
-				.build(influxdb);
+				.build();
 	}
 
 	private static String getEnv(String key) throws Exception {

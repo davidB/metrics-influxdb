@@ -1,4 +1,4 @@
-package metrics_influxdb;
+package metrics_influxdb.v08;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;

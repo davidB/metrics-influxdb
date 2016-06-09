@@ -196,7 +196,9 @@ public class Measure implements Measurement {
 		return addValue(key, Double.valueOf(value));
 	}
 	public Measure addValue(String key, double value) {
-		values.put(key, ""+value);
+		if (!((Double.isNaN(value)) || Double.isInfinite(value))) {
+			values.put(key, "" + value);
+		}
 		return this;
 	}
 	public Measure addValue(String key, int value) {

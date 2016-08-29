@@ -11,14 +11,14 @@ public class BoundedFIFO<T> implements Queue<T> {
 
 	public BoundedFIFO(int capacity) {
 		this.delegate = new LinkedBlockingQueue<>(capacity);
-	} 
+	}
 
 	public int hashCode() {
 		return delegate.hashCode();
 	}
 
 	public boolean add(T e) {
-		while (!delegate.add(e)) {
+		while (!delegate.offer(e)) {
 			delegate.poll();
 		}
 		return true;

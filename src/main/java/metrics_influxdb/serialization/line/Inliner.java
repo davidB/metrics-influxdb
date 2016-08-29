@@ -6,9 +6,7 @@ import metrics_influxdb.measurements.Measure;
 import metrics_influxdb.misc.Miscellaneous;
 
 public class Inliner {
-  private static char[] ESCAPE_CHARS = {' ', ',', '='};
-
-  public String inline(Measure m) {
+	public String inline(Measure m) {
 		String key = buildMeasureKey(m.getName(), m.getTags());
 		String values = buildMeasureFields(m.getValues());
 		String timestamp = "" + m.getTimestamp();
@@ -35,19 +33,19 @@ public class Inliner {
 		String join = "";
 
 		for (Map.Entry<String, String> v: sortedValues.entrySet()) {
-			fields.append(join).append(Miscellaneous.escape(v.getKey(), ESCAPE_CHARS)).append("=").append(v.getValue());		// values are already escaped
+			fields.append(join).append(Miscellaneous.escape(v.getKey(), ' ', ',')).append("=").append(v.getValue());		// values are already escaped
 			join = ",";
 		}
 		return fields.toString();
 	}
 
 	private String buildMeasureKey(String name, Map<String, String> tags) {
-		StringBuilder key = new StringBuilder(Miscellaneous.escape(name, ESCAPE_CHARS));
+		StringBuilder key = new StringBuilder(Miscellaneous.escape(name, ' ', ','));
 		Map<String, String> sortedTags = new InfluxDBSortedMap();
 		sortedTags.putAll(tags);
 
 		for (Map.Entry<String, String> e: sortedTags.entrySet()) {
-			key.append(',').append(Miscellaneous.escape(e.getKey(), ESCAPE_CHARS)).append("=").append(Miscellaneous.escape(e.getValue(), ESCAPE_CHARS));
+			key.append(',').append(Miscellaneous.escape(e.getKey(), ' ', ',')).append("=").append(Miscellaneous.escape(e.getValue(), ' ', ','));
 		}
 
 		return key.toString();

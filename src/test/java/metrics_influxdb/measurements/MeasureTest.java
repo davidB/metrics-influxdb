@@ -1,8 +1,9 @@
 package metrics_influxdb.measurements;
 
-import static junit.framework.TestCase.assertTrue;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
+
+import static org.testng.AssertJUnit.assertTrue;
 
 public class MeasureTest {
 

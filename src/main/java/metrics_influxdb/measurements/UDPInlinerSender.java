@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class UDPInlinerSender extends QueueableSender {
 
 	public UDPInlinerSender(UDPInfluxdbProtocol protocol) {
 		super(MAX_MEASURES_IN_SINGLE_POST);
-		inliner = new Inliner();
+		inliner = new Inliner(TimeUnit.NANOSECONDS);
 		serverAddress = new InetSocketAddress(protocol.host, protocol.port);
 	}
 

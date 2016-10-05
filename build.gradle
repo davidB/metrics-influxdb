@@ -26,6 +26,7 @@ dependencies {
 	testCompile 'org.easytesting:fest-assert-core:2.0M10'
 	testCompile 'org.mockito:mockito-all:1.9.5'
 	testCompile 'org.slf4j:slf4j-simple:1.7.7'
+	testCompile 'com.google.guava:guava:19.0'
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_7

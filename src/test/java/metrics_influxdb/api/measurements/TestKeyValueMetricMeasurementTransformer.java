@@ -1,16 +1,17 @@
 package metrics_influxdb.api.measurements;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.hamcrest.collection.IsMapContaining.hasEntry;
+import com.google.common.base.Joiner;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.testng.annotations.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
 
 public class TestKeyValueMetricMeasurementTransformer {
 	private KeyValueMetricMeasurementTransformer keyValueTransformer = new KeyValueMetricMeasurementTransformer();
@@ -88,7 +89,7 @@ public class TestKeyValueMetricMeasurementTransformer {
 		}
 		subStrings.add(baseMetricName);
 
-		String metricName = String.join(".", subStrings.toArray(new String[]{}));
+		String metricName = Joiner.on(".").join(subStrings);
 
 		Map<String, String> tags = keyValueTransformer.tags(metricName);
 
@@ -108,7 +109,7 @@ public class TestKeyValueMetricMeasurementTransformer {
 		}
 		subStrings.add(baseMetricName);
 
-		String metricName = String.join(".", subStrings.toArray(new String[]{}));
+		String metricName = Joiner.on(".").join(subStrings);
 
 		Map<String, String> tags = keyValueTransformer.tags(metricName);
 
@@ -128,7 +129,7 @@ public class TestKeyValueMetricMeasurementTransformer {
 		}
 		subStrings.add(baseMetricName);
 
-		String metricName = String.join(".", subStrings.toArray(new String[]{}));
+		String metricName = Joiner.on(".").join(subStrings);
 
 		String measurementName = keyValueTransformer.measurementName(metricName);
 
@@ -148,7 +149,7 @@ public class TestKeyValueMetricMeasurementTransformer {
 		}
 		subStrings.add(baseMetricName);
 
-		String metricName = String.join(".", subStrings.toArray(new String[]{}));
+		String metricName = Joiner.on(".").join(subStrings);
 
 		String measurementName = keyValueTransformer.measurementName(metricName);
 

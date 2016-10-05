@@ -1,10 +1,7 @@
 package metrics_influxdb.serialization.line;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
+import metrics_influxdb.measurements.Measure;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,12 +9,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.testng.annotations.Test;
-import static org.testng.AssertJUnit.*;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-
-import metrics_influxdb.measurements.Measure;
-import metrics_influxdb.serialization.line.Inliner;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
+import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.testng.AssertJUnit.assertTrue;
 
 public class InlinerTest {
 	private Inliner inliner = new Inliner();

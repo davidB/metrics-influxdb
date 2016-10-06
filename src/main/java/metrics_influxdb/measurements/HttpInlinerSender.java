@@ -26,7 +26,7 @@ public class HttpInlinerSender extends QueueableSender {
 		super(MAX_MEASURES_IN_SINGLE_POST);
 		URL toJoin;
 
-		inliner = new Inliner();
+		inliner = new Inliner(TimeUnit.MILLISECONDS);
 
 		try {
 			if (protocol.secured) {

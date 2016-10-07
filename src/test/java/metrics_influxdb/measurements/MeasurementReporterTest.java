@@ -1,31 +1,20 @@
 package metrics_influxdb.measurements;
 
-import static metrics_influxdb.SortedMaps.empty;
-import static metrics_influxdb.SortedMaps.singleton;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.Matchers.containsString;
+import com.codahale.metrics.*;
+import com.codahale.metrics.Timer.Context;
+import metrics_influxdb.SortedMaps;
+import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
-import static org.testng.AssertJUnit.*;
+import static metrics_influxdb.SortedMaps.singleton;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-
-import com.codahale.metrics.Clock;
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.codahale.metrics.Timer.Context;
-
-import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
-import metrics_influxdb.measurements.MeasurementReporter;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 
 public class MeasurementReporterTest {
 	private ListInlinerSender sender;
@@ -36,7 +25,7 @@ public class MeasurementReporterTest {
 	public void init() {
 		sender = new ListInlinerSender(100);
 		registry = new MetricRegistry();
-		reporter = new MeasurementReporter(sender, registry, null, TimeUnit.SECONDS, TimeUnit.MILLISECONDS, Clock.defaultClock(), Collections.emptyMap(), MetricMeasurementTransformer.NOOP);
+		reporter = new MeasurementReporter(sender, registry, null, TimeUnit.SECONDS, TimeUnit.MILLISECONDS, Clock.defaultClock(), Collections.<String, String>emptyMap(), MetricMeasurementTransformer.NOOP);
 	}
 
 	@Test
@@ -47,7 +36,7 @@ public class MeasurementReporterTest {
 		String counterName = "c";
 		Counter c = registry.counter(counterName);
 		c.inc();
-		reporter.report(empty(), singleton(counterName, c), empty(), empty(), empty());
+		reporter.report(SortedMaps.<String, Gauge>empty(), singleton(counterName, c), SortedMaps.<String, Histogram>empty(), SortedMaps.<String, Meter>empty(), SortedMaps.<String, Timer>empty());
 		assertThat(sender.getFrames().size(), is(1));
 		assertThat(sender.getFrames().get(0), startsWith(counterName));
 		assertThat(sender.getFrames().get(0), containsString("count=1i"));
@@ -66,7 +55,7 @@ public class MeasurementReporterTest {
 			}
 		};
 
-		reporter.report(singleton(gaugeName, g), empty(), empty(), empty(), empty());
+		reporter.report(SortedMaps.<String, Gauge>singleton(gaugeName, g), SortedMaps.<String, Counter>empty(), SortedMaps.<String, Histogram>empty(), SortedMaps.<String, Meter>empty(), SortedMaps.<String, Timer>empty());
 		assertThat(sender.getFrames().size(), is(1));
 		assertThat(sender.getFrames().get(0), startsWith(gaugeName));
 		assertThat(sender.getFrames().get(0), containsString("value=0i"));
@@ -80,7 +69,8 @@ public class MeasurementReporterTest {
 		String meterName = "m";
 		Meter meter = registry.meter(meterName);
 		meter.mark();
-		reporter.report(empty(), empty(), empty(), singleton(meterName, meter), empty());
+		reporter.report(SortedMaps.<String, Gauge>empty(), SortedMaps.<String, Counter>empty(), SortedMaps.<String, Histogram>empty(), SortedMaps.singleton(meterName, meter), SortedMaps.<String, Timer>empty());
+
 		assertThat(sender.getFrames().size(), is(1));
 		assertThat(sender.getFrames().get(0), startsWith(meterName));
 
@@ -99,7 +89,8 @@ public class MeasurementReporterTest {
 		String histogramName = "h";
 		Histogram histogram = registry.histogram(histogramName);
 		histogram.update(0);
-		reporter.report(empty(), empty(), singleton(histogramName, histogram), empty(), empty());
+		reporter.report(SortedMaps.<String, Gauge>empty(), SortedMaps.<String, Counter>empty(), SortedMaps.singleton(histogramName, histogram), SortedMaps.<String, Meter>empty(), SortedMaps.<String, Timer>empty());
+
 		assertThat(sender.getFrames().size(), is(1));
 		assertThat(sender.getFrames().get(0), startsWith(histogramName));
 
@@ -127,12 +118,13 @@ public class MeasurementReporterTest {
 
 		try {
 			Thread.sleep(20);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException ignored) {
 		}
 
 		ctx.stop();
 
-		reporter.report(empty(), empty(), empty(), empty(), singleton(timerName, meter));
+		reporter.report(SortedMaps.<String, Gauge>empty(), SortedMaps.<String, Counter>empty(), SortedMaps.<String, Histogram>empty(), SortedMaps.<String, Meter>empty(), SortedMaps.singleton(timerName, meter));
+
 
 		assertThat(sender.getFrames().size(), is(1));
 		assertThat(sender.getFrames().get(0), startsWith(timerName));

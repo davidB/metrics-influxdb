@@ -1,19 +1,17 @@
 package metrics_influxdb.api.measurements;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.hamcrest.collection.IsMapContaining.hasKey;
-import static org.hamcrest.collection.IsMapContaining.hasValue;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.testng.annotations.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.collection.IsMapContaining.*;
 
 public class TestCategoriesMetricMeasurementTransformer {
 	@Test
@@ -22,11 +20,11 @@ public class TestCategoriesMetricMeasurementTransformer {
 
 		List<String> metricsName = Arrays.asList("metric", "a.metric", "a.metric.that.should.define.different.name.spaces");
 
-		metricsName.forEach(n -> {
+		for (String n : metricsName) {
 			assertThat(noCategories.measurementName(n), is(n));
 			assertThat(noCategories.tags(n), notNullValue());
 			assertThat(noCategories.tags(n).entrySet(), empty());
-		});
+		}
 	}
 
 	@Test

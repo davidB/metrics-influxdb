@@ -1,23 +1,19 @@
 package metrics_influxdb.measurements;
 
-import static metrics_influxdb.SortedMaps.empty;
-import static metrics_influxdb.SortedMaps.singleton;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.Matchers.containsString;
+import com.codahale.metrics.*;
+import metrics_influxdb.SortedMaps;
+import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.testng.annotations.Test;
+import static metrics_influxdb.SortedMaps.singleton;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-
-import com.codahale.metrics.Clock;
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-
-import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 
 public class MeasurementReporterWithBaseTagsTest {
 	private ListInlinerSender sender = new ListInlinerSender(100);
@@ -37,7 +33,7 @@ public class MeasurementReporterWithBaseTagsTest {
 		String counterName = "c";
 		Counter c = registry.counter(counterName);
 		c.inc();
-		reporter.report(empty(), singleton(counterName, c), empty(), empty(), empty());
+		reporter.report(SortedMaps.<String, Gauge>empty(), singleton(counterName, c), SortedMaps.<String, Histogram>empty(), SortedMaps.<String, Meter>empty(), SortedMaps.<String, Timer>empty());
 		assertThat(sender.getFrames().size(), is(1));
 		assertThat(sender.getFrames().get(0), startsWith(counterName));
 		assertThat(sender.getFrames().get(0), containsString("count=1i"));

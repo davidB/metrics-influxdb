@@ -1,15 +1,22 @@
 package metrics_influxdb.serialization.line;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import metrics_influxdb.measurements.Measure;
 import metrics_influxdb.misc.Miscellaneous;
 
 public class Inliner {
-	public String inline(Measure m) {
+		private TimeUnit precision;
+
+		public Inliner(TimeUnit precision) {
+			this.precision = precision;
+		}
+
+		public String inline(Measure m) {
 		String key = buildMeasureKey(m.getName(), m.getTags());
 		String values = buildMeasureFields(m.getValues());
-		String timestamp = "" + m.getTimestamp();
+		String timestamp = "" + precision.convert(m.getTimestamp(), TimeUnit.MILLISECONDS);
 
 		return key + " " + values +  " " + timestamp;
 	}

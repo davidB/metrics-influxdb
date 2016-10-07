@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,8 +18,10 @@ import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.testng.AssertJUnit.assertTrue;
 
+import metrics_influxdb.measurements.Measure;
+
 public class InlinerTest {
-	private Inliner inliner = new Inliner();
+	private Inliner inliner = new Inliner(TimeUnit.MILLISECONDS);
 
 	@Test
 	public void a_single_word_name_is_untouched() {
@@ -138,6 +141,17 @@ public class InlinerTest {
 		String output = inliner.inline(m);
 
 		assertThat(output, endsWith(""+time));
+	}
+
+	@Test
+	public void given_timestamp_with_precision_is_used() {
+		inliner = new Inliner(TimeUnit.NANOSECONDS);
+		long time = System.currentTimeMillis();
+		Measure m = new Measure("cpu", 0l, time);
+
+		String output = inliner.inline(m);
+
+		assertThat(output, endsWith(""+time + "000000"));
 	}
 
 	@Test

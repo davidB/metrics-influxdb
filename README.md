@@ -33,7 +33,7 @@ The library provide a lighter client than influxdb-java to push only metrics.
 ### Released
 ```
  dependencies {
-	compile 'com.github.davidb:metrics-influxdb:0.9.2'
+	compile 'com.github.davidb:metrics-influxdb:0.9.3'
  }
 ```
 

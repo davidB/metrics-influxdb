@@ -18,7 +18,7 @@ public class BoundedFIFO<T> implements Queue<T> {
 	}
 
 	public boolean add(T e) {
-		while (!delegate.add(e)) {
+		while (!delegate.offer(e)) {
 			delegate.poll();
 		}
 		return true;

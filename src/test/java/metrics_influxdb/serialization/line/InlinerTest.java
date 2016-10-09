@@ -18,8 +18,6 @@ import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.testng.AssertJUnit.assertTrue;
 
-import metrics_influxdb.measurements.Measure;
-
 public class InlinerTest {
 	private Inliner inliner = new Inliner(TimeUnit.MILLISECONDS);
 

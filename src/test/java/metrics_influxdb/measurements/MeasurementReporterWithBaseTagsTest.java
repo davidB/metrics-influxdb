@@ -19,6 +19,7 @@ public class MeasurementReporterWithBaseTagsTest {
 	private ListInlinerSender sender = new ListInlinerSender(100);
 	private MetricRegistry registry = new MetricRegistry();
 
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void generatedMeasurementContainsBaseTags() {
 		String serverKey = "server";

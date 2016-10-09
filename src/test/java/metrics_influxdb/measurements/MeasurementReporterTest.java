@@ -28,6 +28,7 @@ public class MeasurementReporterTest {
 		reporter = new MeasurementReporter(sender, registry, null, TimeUnit.SECONDS, TimeUnit.MILLISECONDS, Clock.defaultClock(), Collections.<String, String>emptyMap(), MetricMeasurementTransformer.NOOP);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void reportingOneCounterGeneratesOneLine() {
 		assertThat(sender.getFrames().size(), is(0));
@@ -42,6 +43,7 @@ public class MeasurementReporterTest {
 		assertThat(sender.getFrames().get(0), containsString("count=1i"));
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void reportingOneGaugeGeneratesOneLine() {
 		assertThat(sender.getFrames().size(), is(0));
@@ -61,6 +63,7 @@ public class MeasurementReporterTest {
 		assertThat(sender.getFrames().get(0), containsString("value=0i"));
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void reportingOneMeterGeneratesOneLine() {
 		assertThat(sender.getFrames().size(), is(0));
@@ -81,6 +84,7 @@ public class MeasurementReporterTest {
 		assertThat(sender.getFrames().get(0), containsString("mean-minute="));
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void reportingOneHistogramGeneratesOneLine() {
 		assertThat(sender.getFrames().size(), is(0));
@@ -107,6 +111,7 @@ public class MeasurementReporterTest {
 		assertThat(sender.getFrames().get(0), containsString("run-count="));
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void reportingOneTimerGeneratesOneLine() {
 		assertThat(sender.getFrames().size(), is(0));

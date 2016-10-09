@@ -15,7 +15,6 @@ package metrics_influxdb.v08;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -76,7 +75,6 @@ public class InfluxdbHttp implements Influxdb {
 	public InfluxdbHttp(String host, int port, String path, String database, String username, String password) throws Exception  {
 		this("http", host, port, path, database, username, password, TimeUnit.MILLISECONDS);
 	}
-
 	/**
 	 * @param timePrecision The precision of the epoch time that is sent to the server,
 	 *                      should be TimeUnit.MILLISECONDS unless you are using a custom Clock
@@ -84,7 +82,17 @@ public class InfluxdbHttp implements Influxdb {
 	 * @throws IOException If the URL is malformed
 	 */
 	public InfluxdbHttp(String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception  {
-		this("http", host, port, "", database, username, password, timePrecision);
+		this("http", host, port, database, username, password, timePrecision);
+	}
+
+	/**
+	 * @param timePrecision The precision of the epoch time that is sent to the server,
+	 *                      should be TimeUnit.MILLISECONDS unless you are using a custom Clock
+	 *                      that does not return milliseconds epoch time for getTime()
+	 * @throws IOException If the URL is malformed
+	 */
+	public InfluxdbHttp(String scheme, String host, int port, String database, String username, String password, TimeUnit timePrecision) throws Exception  {
+		this(scheme, host, port, "", database, username, password, timePrecision);
 	}
 
 	/**

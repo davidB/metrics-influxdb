@@ -237,7 +237,7 @@ public class InfluxdbReporter  {
 			if (protocol instanceof HttpInfluxdbProtocol) {
 				try {
 					HttpInfluxdbProtocol p = (HttpInfluxdbProtocol) protocol;
-					return new InfluxdbHttp(p.host, p.port, p.database, p.user, p.password, durationUnit);
+					return new InfluxdbHttp(p.scheme, p.host, p.port, p.database, p.user, p.password, durationUnit);
 				} catch(RuntimeException exc) {
 					throw exc;
 				} catch(Exception exc) {

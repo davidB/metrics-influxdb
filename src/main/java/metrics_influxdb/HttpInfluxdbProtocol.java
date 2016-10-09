@@ -5,6 +5,7 @@ public class HttpInfluxdbProtocol implements InfluxdbProtocol {
 	public final static int DEFAULT_PORT = 8086;
 	public final static String DEFAULT_DATABASE = "metrics";
 
+	public final String scheme;
 	public final String user;
 	public final String password;
 	public final String host; 
@@ -12,14 +13,19 @@ public class HttpInfluxdbProtocol implements InfluxdbProtocol {
 	public final boolean secured;
 	public final String database;
 
-	public HttpInfluxdbProtocol(String host, int port, String user, String password, String db) {
+	public HttpInfluxdbProtocol(String scheme, String host, int port, String user, String password, String db) {
 		super();
+		this.scheme = scheme;
 		this.host = host;
 		this.port = port;
 		this.user = user;
 		this.password = password;
 		this.database = db;
 		this.secured = (user != null) && (password != null);
+	}
+	
+	public HttpInfluxdbProtocol(String host, int port, String user, String password, String db) {
+		this("http", host, port, user, password, db);
 	}
 
 	public HttpInfluxdbProtocol(String host) {

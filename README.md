@@ -33,7 +33,7 @@ The library provide a lighter client than influxdb-java to push only metrics.
 ### Released
 ```
  dependencies {
-	compile 'com.github.davidb:metrics-influxdb:0.8.2'
+	compile 'com.github.davidb:metrics-influxdb:0.9.2'
  }
 ```
 
@@ -69,7 +69,7 @@ With the previous simple configuration, all defaults will be used, mainly:
 But you are free of course to define all settings by yourself :
 ```
 final ScheduledReporter reporter = InfluxdbReporter.forRegistry(registry)
-    .protocol(new HttpInfluxdbProtocol("influxdb-server", 8086, "admin", "53CR3TP455W0RD", "metrics"))
+    .protocol(new HttpInfluxdbProtocol("http", "influxdb-server", 8086, "admin", "53CR3TP455W0RD", "metrics"))
     .convertRatesTo(TimeUnit.SECONDS)
     .convertDurationsTo(TimeUnit.MILLISECONDS)
     .filter(MetricFilter.ALL)

@@ -63,3 +63,6 @@ brace_style = expand
 ;vim:path=~/.vim/bundle/js-beautify/js/lib/beautify-html.js
 ;vim:max_char=78:brace_style=expand
 
+[**.java]
+indent_size = 2
+indent_style = tab

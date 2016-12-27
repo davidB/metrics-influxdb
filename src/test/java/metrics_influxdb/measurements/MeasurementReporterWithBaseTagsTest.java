@@ -3,6 +3,7 @@ package metrics_influxdb.measurements;
 import com.codahale.metrics.*;
 import metrics_influxdb.SortedMaps;
 import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
+import metrics_influxdb.api.measurements.MetricsAdapter;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -27,7 +28,7 @@ public class MeasurementReporterWithBaseTagsTest {
 		Map<String, String> baseTags = new HashMap<>();
 		baseTags.put(serverKey, serverName);
 
-		MeasurementReporter reporter = new MeasurementReporter(sender, registry, null, TimeUnit.SECONDS, TimeUnit.MILLISECONDS, Clock.defaultClock(), baseTags, MetricMeasurementTransformer.NOOP);
+		MeasurementReporter reporter = new MeasurementReporter(sender, registry, null, TimeUnit.SECONDS, TimeUnit.MILLISECONDS, Clock.defaultClock(), baseTags, MetricMeasurementTransformer.NOOP, MetricsAdapter.NOOP);
 		assertThat(sender.getFrames().size(), is(0));
 
 		// Let's test with one counter

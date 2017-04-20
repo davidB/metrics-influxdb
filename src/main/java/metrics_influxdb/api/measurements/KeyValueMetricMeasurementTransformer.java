@@ -19,15 +19,25 @@ import java.util.Map;
  *  </ul>
  */
 public class KeyValueMetricMeasurementTransformer implements MetricMeasurementTransformer {
-	private final static String SEPARATOR = "\\.";
+	private final String seperator;
 
 	public KeyValueMetricMeasurementTransformer() {
+		this(null);
 	}
+	
+	public KeyValueMetricMeasurementTransformer(String customSeperatorRegex) {
+		if(customSeperatorRegex != null) {
+		    this.seperator = customSeperatorRegex;
+		}
+		else {
+		    this.seperator = "\\.";
+		}
+	    }
 
 	@Override
 	public Map<String, String> tags(String metricName) {
 		Map<String, String> generatedTags = new HashMap<>();
-		String[] splitted = metricName.split(SEPARATOR);
+		String[] splitted = metricName.split(seperator);
 
 		int nbPairs = isEven(splitted.length)?(splitted.length-1)/2:(splitted.length/2)-1;
 
@@ -44,7 +54,7 @@ public class KeyValueMetricMeasurementTransformer implements MetricMeasurementTr
 
 	@Override
 	public String measurementName(String metricName) {
-		String[] splitted = metricName.split(SEPARATOR);
+		String[] splitted = metricName.split(seperator);
 
 		if (isEven(splitted.length)) {
 			return splitted[splitted.length - 1];

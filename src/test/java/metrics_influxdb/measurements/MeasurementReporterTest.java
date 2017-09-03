@@ -4,6 +4,11 @@ import com.codahale.metrics.*;
 import com.codahale.metrics.Timer.Context;
 import metrics_influxdb.SortedMaps;
 import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
+import metrics_influxdb.measurements.reporter.CounterMeasurementReporter;
+import metrics_influxdb.measurements.reporter.GaugeMeasurementReporter;
+import metrics_influxdb.measurements.reporter.HistogramMeasurementReporter;
+import metrics_influxdb.measurements.reporter.MeterMeasurementReporter;
+import metrics_influxdb.measurements.reporter.TimerMeasurementReporter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -25,7 +30,8 @@ public class MeasurementReporterTest {
 	public void init() {
 		sender = new ListInlinerSender(100);
 		registry = new MetricRegistry();
-		reporter = new MeasurementReporter(sender, registry, null, TimeUnit.SECONDS, TimeUnit.MILLISECONDS, Clock.defaultClock(), Collections.<String, String>emptyMap(), MetricMeasurementTransformer.NOOP);
+
+		reporter = new MeasurementReporter(sender, registry, null, TimeUnit.SECONDS, TimeUnit.MILLISECONDS, Clock.defaultClock(), Collections.<String, String>emptyMap(), MetricMeasurementTransformer.NOOP, new CounterMeasurementReporter(), new GaugeMeasurementReporter(), new HistogramMeasurementReporter(), new MeterMeasurementReporter(TimeUnit.SECONDS), new TimerMeasurementReporter(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false));
 	}
 
 	@SuppressWarnings("rawtypes")

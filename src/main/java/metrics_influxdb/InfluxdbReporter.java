@@ -28,6 +28,11 @@ import metrics_influxdb.measurements.HttpInlinerSender;
 import metrics_influxdb.measurements.MeasurementReporter;
 import metrics_influxdb.measurements.Sender;
 import metrics_influxdb.measurements.UdpInlinerSender;
+import metrics_influxdb.measurements.reporter.CounterMeasurementReporter;
+import metrics_influxdb.measurements.reporter.GaugeMeasurementReporter;
+import metrics_influxdb.measurements.reporter.HistogramMeasurementReporter;
+import metrics_influxdb.measurements.reporter.MeterMeasurementReporter;
+import metrics_influxdb.measurements.reporter.TimerMeasurementReporter;
 import metrics_influxdb.misc.Miscellaneous;
 import metrics_influxdb.misc.VisibilityIncreasedForTests;
 import metrics_influxdb.v08.Influxdb;
@@ -73,6 +78,11 @@ public class InfluxdbReporter  {
 		private MetricFilter filter;
 		private boolean skipIdleMetrics;
 		private ScheduledExecutorService executor;
+		private GaugeMeasurementReporter gaugeMeasurementReporter;
+		private HistogramMeasurementReporter histogramMeasurementReporter;
+		private MeterMeasurementReporter meterMeasurementReporter;
+		private TimerMeasurementReporter timerMeasurementReporter;
+		private CounterMeasurementReporter counterMeasurementReporter;
 
 		@VisibilityIncreasedForTests InfluxdbCompatibilityVersions influxdbVersion;
 		@VisibilityIncreasedForTests InfluxdbProtocol protocol;
@@ -164,6 +174,61 @@ public class InfluxdbReporter  {
 		}
 
 		/**
+		 * Add a custom measurement reporter for counters.
+		 *
+		 * @param measurementReporter a {@link CounterMeasurementReporter}
+		 * @return {@code this}
+		 */
+		public Builder counterMeasurementReporter(CounterMeasurementReporter measurementReporter) {
+			this.counterMeasurementReporter = measurementReporter;
+			return this;
+		}
+
+		/**
+		 * Add a custom measurement reporter for gauges.
+		 *
+		 * @param measurementReporter a {@link GaugeMeasurementReporter}
+		 * @return {@code this}
+		 */
+		public Builder gaugeMeasurementReporter(GaugeMeasurementReporter measurementReporter) {
+			this.gaugeMeasurementReporter = measurementReporter;
+			return this;
+		}
+
+		/**
+		 * Add a custom measurement reporter for histograms.
+		 *
+		 * @param measurementReporter a {@link HistogramMeasurementReporter}
+		 * @return {@code this}
+		 */
+		public Builder histogramMeasurementReporter(HistogramMeasurementReporter measurementReporter) {
+			this.histogramMeasurementReporter = measurementReporter;
+			return this;
+		}
+
+		/**
+		 * Add a custom measurement reporter for meters.
+		 *
+		 * @param measurementReporter a {@link MeterMeasurementReporter}
+		 * @return {@code this}
+		 */
+		public Builder meterMeasurementReporter(MeterMeasurementReporter measurementReporter) {
+			this.meterMeasurementReporter = measurementReporter;
+			return this;
+		}
+
+		/**
+		 * Add a custom measurement reporter for timers.
+		 *
+		 * @param measurementReporter a {@link TimerMeasurementReporter}
+		 * @return {@code this}
+		 */
+		public Builder timerMeasurementReporter(TimerMeasurementReporter measurementReporter) {
+			this.timerMeasurementReporter = measurementReporter;
+			return this;
+		}
+
+		/**
 		 * Builds a {@link ScheduledReporter} with the given properties, sending
 		 * metrics using the given InfluxDB.
 		 *
@@ -181,17 +246,25 @@ public class InfluxdbReporter  {
 						;
 				break;
 			default:
-				Sender s = buildSender();
-				reporter = executor == null
-						? new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, clock, tags, transformer)
-						: new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, clock, tags, transformer, executor)
-						;
+				if (timerMeasurementReporter == null) {
+					timerMeasurementReporter = new TimerMeasurementReporter(rateUnit, durationUnit, false);
+				}
+
+				if (meterMeasurementReporter == null) {
+					meterMeasurementReporter = new MeterMeasurementReporter(rateUnit);
+				}
+
+				if (executor != null) {
+					return new MeasurementReporter(buildSender(), registry, filter, rateUnit, durationUnit, clock, tags, transformer, counterMeasurementReporter, gaugeMeasurementReporter, histogramMeasurementReporter, meterMeasurementReporter, timerMeasurementReporter, executor);
+				} else {
+					return new MeasurementReporter(buildSender(), registry, filter, rateUnit, durationUnit, clock, tags, transformer, counterMeasurementReporter, gaugeMeasurementReporter, histogramMeasurementReporter, meterMeasurementReporter, timerMeasurementReporter);
+				}
 			}
 			return reporter;
 		}
 
 		/**
-		 * Operates with influxdb version less or equal than 08. 
+		 * Operates with influxdb version less or equal than 08.
 		 * @return the builder itself
 		 */
 		public Builder v08() {

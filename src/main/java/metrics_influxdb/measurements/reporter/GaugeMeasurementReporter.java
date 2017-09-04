@@ -7,9 +7,9 @@ import java.util.Map;
 
 public class GaugeMeasurementReporter {
 
-  public Measure getMeasurement(String metricName, Map<String, String> tags, Gauge metric, long timestamp) {
+  public Measure getMeasurement(String metricName, String transformedName, Map<String, String> tags, Gauge metric, long timestamp) {
 
-    Measure measure = new Measure(metricName)
+    Measure measure = new Measure(transformedName)
         .timestamp(timestamp)
         .addTag(tags);
     Object o = metric.getValue();

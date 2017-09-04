@@ -8,11 +8,11 @@ import java.util.Map;
 
 public class HistogramMeasurementReporter {
 
-	public Measure getMeasurement(String metricName, Map<String, String> tags, Histogram metric, long timestamp) {
+	public Measure getMeasurement(String metricName, String transformedName, Map<String, String> tags, Histogram metric, long timestamp) {
 
 		Snapshot snapshot = metric.getSnapshot();
 
-		return new Measure(metricName)
+		return new Measure(transformedName)
 				.timestamp(timestamp)
 				.addTag(tags)
 				.addValue("count", snapshot.size())

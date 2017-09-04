@@ -22,11 +22,11 @@ public class TimerMeasurementReporter {
     this.timerCallCounts = new ConcurrentHashMap<>();
   }
 
-  public Measure getMeasurement(String metricName, Map<String, String> tags, Timer metric, long timestamp) {
+  public Measure getMeasurement(String metricName, String transformedName, Map<String, String> tags, Timer metric, long timestamp) {
 
     Snapshot snapshot = metric.getSnapshot();
 
-    Measure measure = new Measure(metricName)
+    Measure measure = new Measure(transformedName)
         .timestamp(timestamp)
         .addTag(tags)
         .addValue("one-minute", convertRate(metric.getOneMinuteRate()))

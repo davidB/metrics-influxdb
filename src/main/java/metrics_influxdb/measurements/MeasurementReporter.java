@@ -15,7 +15,11 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Timer;
 import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
-import metrics_influxdb.measurements.reporter.*;
+import metrics_influxdb.measurements.reporter.CounterMeasurementReporter;
+import metrics_influxdb.measurements.reporter.GaugeMeasurementReporter;
+import metrics_influxdb.measurements.reporter.HistogramMeasurementReporter;
+import metrics_influxdb.measurements.reporter.MeterMeasurementReporter;
+import metrics_influxdb.measurements.reporter.TimerMeasurementReporter;
 
 public class MeasurementReporter extends ScheduledReporter{
 
@@ -68,47 +72,42 @@ public class MeasurementReporter extends ScheduledReporter{
 
 		for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
 
-			String metricName = transformer.measurementName(entry.getKey());
 			Map<String, String> tags = new HashMap<>(baseTags);
 			tags.putAll(transformer.tags(entry.getKey()));
 
-			sender.send(gaugeMeasurementReporter.getMeasurement(metricName, tags, entry.getValue(), timestamp));
+      sender.send(gaugeMeasurementReporter.getMeasurement(entry.getKey(), transformer.measurementName(entry.getKey()), tags, entry.getValue(), timestamp));
 		}
 
 		for (Map.Entry<String, Counter> entry : counters.entrySet()) {
 
-			String metricName = transformer.measurementName(entry.getKey());
 			Map<String, String> tags = new HashMap<>(baseTags);
 			tags.putAll(transformer.tags(entry.getKey()));
 
-			sender.send(counterMeasurementReporter.getMeasurement(metricName, tags, entry.getValue(), timestamp));
+      sender.send(counterMeasurementReporter.getMeasurement(entry.getKey(), transformer.measurementName(entry.getKey()), tags, entry.getValue(), timestamp));
 		}
 
 		for (Map.Entry<String, Histogram> entry : histograms.entrySet()) {
 
-			String metricName = transformer.measurementName(entry.getKey());
 			Map<String, String> tags = new HashMap<>(baseTags);
 			tags.putAll(transformer.tags(entry.getKey()));
 
-			sender.send(histogramMeasurementReporter.getMeasurement(metricName, tags, entry.getValue(), timestamp));
+      sender.send(histogramMeasurementReporter.getMeasurement(entry.getKey(), transformer.measurementName(entry.getKey()), tags, entry.getValue(), timestamp));
 		}
 
 		for (Map.Entry<String, Meter> entry : meters.entrySet()) {
 
-			String metricName = transformer.measurementName(entry.getKey());
 			Map<String, String> tags = new HashMap<>(baseTags);
-			tags.putAll(transformer.tags(entry.getKey()));
+      tags.putAll(transformer.tags(entry.getKey()));
 
-			sender.send(meterMeasurementReporter.getMeasurement(metricName, tags, entry.getValue(), timestamp));
+      sender.send(meterMeasurementReporter.getMeasurement(entry.getKey(), transformer.measurementName(entry.getKey()), tags, entry.getValue(), timestamp));
 		}
 
 		for (Map.Entry<String, Timer> entry : timers.entrySet()) {
 
-			String metricName = transformer.measurementName(entry.getKey());
 			Map<String, String> tags = new HashMap<>(baseTags);
 			tags.putAll(transformer.tags(entry.getKey()));
 
-			sender.send(timerMeasurementReporter.getMeasurement(metricName, tags, entry.getValue(), timestamp));
+      sender.send(timerMeasurementReporter.getMeasurement(entry.getKey(), transformer.measurementName(entry.getKey()), tags, entry.getValue(), timestamp));
 		}
 
 		sender.flush();

@@ -7,9 +7,9 @@ import java.util.Map;
 
 public class CounterMeasurementReporter {
 
-  public Measure getMeasurement(String metricName, Map<String, String> tags, Counter metric, long timestamp) {
+  public Measure getMeasurement(String metricName, String transformedName, Map<String, String> tags, Counter metric, long timestamp) {
 
-    return new Measure(metricName)
+    return new Measure(transformedName)
         .timestamp(timestamp)
         .addTag(tags)
         .addValue("count", metric.getCount());

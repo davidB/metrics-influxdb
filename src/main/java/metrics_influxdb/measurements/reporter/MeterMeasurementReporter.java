@@ -14,9 +14,9 @@ public class MeterMeasurementReporter {
     this.rateFactor = rateUnit.toSeconds(1);
   }
 
-  public Measure getMeasurement(String metricName, Map<String, String> tags, Meter metric, long timestamp) {
+  public Measure getMeasurement(String metricName, String transformedName, Map<String, String> tags, Meter metric, long timestamp) {
 
-    Measure measure = new Measure(metricName)
+    Measure measure = new Measure(transformedName)
         .timestamp(timestamp)
         .addTag(tags)
         .addValue("count", metric.getCount())

@@ -59,6 +59,7 @@ public class TimerMeasurementReporter {
 
     Long lastCount = timerCallCounts.get(metricName);
     Long currentCount = metric.getCount();
+    timerCallCounts.put(metricName, lastCount);
 
     return lastCount == null || currentCount.equals(lastCount);
   }

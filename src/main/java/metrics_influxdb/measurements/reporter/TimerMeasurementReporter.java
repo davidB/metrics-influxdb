@@ -10,64 +10,64 @@ import java.util.concurrent.TimeUnit;
 
 public class TimerMeasurementReporter {
 
-	protected double durationFactor;
-	protected double rateFactor;
-	protected boolean skipIdleMetrics;
-	protected Map<String, Long> timerCallCounts;
+  protected double durationFactor;
+  protected double rateFactor;
+  protected boolean skipIdleMetrics;
+  protected Map<String, Long> timerCallCounts;
 
-	public TimerMeasurementReporter(TimeUnit rateUnit, TimeUnit durationUnit, boolean skipIdleMetrics) {
-		this.rateFactor = rateUnit.toSeconds(1);
-		this.durationFactor = 1.0 / durationUnit.toNanos(1);
-		this.skipIdleMetrics = skipIdleMetrics;
-		this.timerCallCounts = new ConcurrentHashMap<>();
-	}
+  public TimerMeasurementReporter(TimeUnit rateUnit, TimeUnit durationUnit, boolean skipIdleMetrics) {
+    this.rateFactor = rateUnit.toSeconds(1);
+    this.durationFactor = 1.0 / durationUnit.toNanos(1);
+    this.skipIdleMetrics = skipIdleMetrics;
+    this.timerCallCounts = new ConcurrentHashMap<>();
+  }
 
-	public Measure getMeasurement(String metricName, Map<String, String> tags, Timer metric, long timestamp) {
+  public Measure getMeasurement(String metricName, Map<String, String> tags, Timer metric, long timestamp) {
 
-		Snapshot snapshot = metric.getSnapshot();
+    Snapshot snapshot = metric.getSnapshot();
 
-		Measure measure = new Measure(metricName)
-				.timestamp(timestamp)
-				.addTag(tags)
-				.addValue("one-minute", convertRate(metric.getOneMinuteRate()))
-				.addValue("five-minute", convertRate(metric.getFiveMinuteRate()))
-				.addValue("fifteen-minute", convertRate(metric.getFifteenMinuteRate()))
-				.addValue("mean-minute", convertRate(metric.getMeanRate()))
-				.addValue("run-count", metric.getCount());
+    Measure measure = new Measure(metricName)
+        .timestamp(timestamp)
+        .addTag(tags)
+        .addValue("one-minute", convertRate(metric.getOneMinuteRate()))
+        .addValue("five-minute", convertRate(metric.getFiveMinuteRate()))
+        .addValue("fifteen-minute", convertRate(metric.getFifteenMinuteRate()))
+        .addValue("mean-minute", convertRate(metric.getMeanRate()))
+        .addValue("run-count", metric.getCount());
 
-		if (!canSkip(metricName, metric)) {
-			measure.addValue("count", snapshot.size())
-					.addValue("min", convertDuration(snapshot.getMin()))
-					.addValue("max", convertDuration(snapshot.getMax()))
-					.addValue("mean", convertDuration(snapshot.getMean()))
-					.addValue("std-dev", convertDuration(snapshot.getStdDev()))
-					.addValue("50-percentile", convertDuration(snapshot.getMedian()))
-					.addValue("75-percentile", convertDuration(snapshot.get75thPercentile()))
-					.addValue("95-percentile", convertDuration(snapshot.get95thPercentile()))
-					.addValue("99-percentile", convertDuration(snapshot.get99thPercentile()))
-					.addValue("999-percentile", convertDuration(snapshot.get999thPercentile()));
-		}
+    if (!canSkip(metricName, metric)) {
+      measure.addValue("count", snapshot.size())
+          .addValue("min", convertDuration(snapshot.getMin()))
+          .addValue("max", convertDuration(snapshot.getMax()))
+          .addValue("mean", convertDuration(snapshot.getMean()))
+          .addValue("std-dev", convertDuration(snapshot.getStdDev()))
+          .addValue("50-percentile", convertDuration(snapshot.getMedian()))
+          .addValue("75-percentile", convertDuration(snapshot.get75thPercentile()))
+          .addValue("95-percentile", convertDuration(snapshot.get95thPercentile()))
+          .addValue("99-percentile", convertDuration(snapshot.get99thPercentile()))
+          .addValue("999-percentile", convertDuration(snapshot.get999thPercentile()));
+    }
 
-		return measure;
-	}
+    return measure;
+  }
 
-	protected boolean canSkip(String metricName, Timer metric) {
+  protected boolean canSkip(String metricName, Timer metric) {
 
-		if (!skipIdleMetrics) {
-			return false;
-		}
+    if (!skipIdleMetrics) {
+      return false;
+    }
 
-		Long lastCount = timerCallCounts.get(metricName);
-		Long currentCount = metric.getCount();
+    Long lastCount = timerCallCounts.get(metricName);
+    Long currentCount = metric.getCount();
 
-		return lastCount == null || currentCount.equals(lastCount);
-	}
+    return lastCount == null || currentCount.equals(lastCount);
+  }
 
-	protected double convertDuration(double duration) {
-		return duration * durationFactor;
-	}
+  protected double convertDuration(double duration) {
+    return duration * durationFactor;
+  }
 
-	protected double convertRate(double rate) {
-		return rate * rateFactor;
-	}
+  protected double convertRate(double rate) {
+    return rate * rateFactor;
+  }
 }

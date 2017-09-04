@@ -23,7 +23,7 @@ public class HistogramMeasurementReporter {
 				.addValue("50-percentile", snapshot.getMedian())
 				.addValue("75-percentile", snapshot.get75thPercentile())
 				.addValue("95-percentile", snapshot.get95thPercentile())
-				.addValue("99-percentile", snapshot.get99thPercentile())
+        .addValue("99-percentile", snapshot.get99thPercentile())
 				.addValue("999-percentile", snapshot.get999thPercentile())
 				.addValue("run-count", metric.getCount());
 	}

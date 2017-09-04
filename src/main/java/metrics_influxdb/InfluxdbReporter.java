@@ -78,11 +78,12 @@ public class InfluxdbReporter  {
 		private MetricFilter filter;
 		private boolean skipIdleMetrics;
 		private ScheduledExecutorService executor;
+    private CounterMeasurementReporter counterMeasurementReporter;
 		private GaugeMeasurementReporter gaugeMeasurementReporter;
 		private HistogramMeasurementReporter histogramMeasurementReporter;
 		private MeterMeasurementReporter meterMeasurementReporter;
 		private TimerMeasurementReporter timerMeasurementReporter;
-		private CounterMeasurementReporter counterMeasurementReporter;
+
 
 		@VisibilityIncreasedForTests InfluxdbCompatibilityVersions influxdbVersion;
 		@VisibilityIncreasedForTests InfluxdbProtocol protocol;
@@ -100,6 +101,11 @@ public class InfluxdbReporter  {
 			this.protocol = new HttpInfluxdbProtocol();
 			this.influxdbVersion = InfluxdbCompatibilityVersions.LATEST;
 			this.tags = new HashMap<>();
+      this.counterMeasurementReporter = new CounterMeasurementReporter();
+			this.gaugeMeasurementReporter = new GaugeMeasurementReporter();
+			this.histogramMeasurementReporter = new HistogramMeasurementReporter();
+			this.meterMeasurementReporter = new MeterMeasurementReporter(TimeUnit.SECONDS);
+			this.timerMeasurementReporter = new TimerMeasurementReporter(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false);
 		}
 
 		/**

@@ -4,8 +4,8 @@ public class HttpInfluxdbProtocol implements InfluxdbProtocol {
 	public final static String DEFAULT_HOST = "127.0.0.1";
 	public final static int DEFAULT_PORT = 8086;
 	public final static String DEFAULT_DATABASE = "metrics";
-    public final static long DEFAULT_CONNECT_TIMEOUT_SECONDS = 2;
-    public final static long DEFAULT_READ_TIMEOUT_SECONDS = 2;
+	public final static long DEFAULT_CONNECT_TIMEOUT_SECONDS = 2;
+	public final static long DEFAULT_READ_TIMEOUT_SECONDS = 2;
     
 	public final String scheme;
 	public final String user;

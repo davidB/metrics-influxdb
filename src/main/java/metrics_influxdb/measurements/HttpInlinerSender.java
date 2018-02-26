@@ -21,12 +21,16 @@ public class HttpInlinerSender extends QueueableSender {
 	private static int MAX_MEASURES_IN_SINGLE_POST = 5000;
 	private final URL writeURL;
 	private final Inliner inliner;
+	private final long connectTimeout;
+	private final long readTimeout;
 
 	public HttpInlinerSender(HttpInfluxdbProtocol protocol) {
 		super(MAX_MEASURES_IN_SINGLE_POST);
 		URL toJoin;
 
 		inliner = new Inliner(TimeUnit.MILLISECONDS);
+		connectTimeout =  protocol.connectTimeout;
+		readTimeout = protocol.readTimeout;
 
 		try {
 			if (protocol.secured) {
@@ -52,8 +56,8 @@ public class HttpInlinerSender extends QueueableSender {
 		try {
 			con = (HttpURLConnection) writeURL.openConnection();
 			con.setRequestMethod("POST");
-			con.setConnectTimeout(Long.valueOf(TimeUnit.SECONDS.toMillis(2)).intValue());
-			con.setReadTimeout(Long.valueOf(TimeUnit.SECONDS.toMillis(2)).intValue());
+			con.setConnectTimeout(Long.valueOf(TimeUnit.SECONDS.toMillis(connectTimeout)).intValue());
+			con.setReadTimeout(Long.valueOf(TimeUnit.SECONDS.toMillis(readTimeout)).intValue());
 
 			// Send post request
 			con.setDoOutput(true);

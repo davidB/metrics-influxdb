@@ -7,4 +7,4 @@ cache:
    - gradle-cache
    - netbeans
 jdk:
-  - oraclejdk7
+  - openjdk7

@@ -28,6 +28,7 @@ import metrics_influxdb.measurements.HttpInlinerSender;
 import metrics_influxdb.measurements.MeasurementReporter;
 import metrics_influxdb.measurements.Sender;
 import metrics_influxdb.measurements.UdpInlinerSender;
+import metrics_influxdb.misc.HttpDatabaseCreator;
 import metrics_influxdb.misc.Miscellaneous;
 import metrics_influxdb.misc.VisibilityIncreasedForTests;
 import metrics_influxdb.v08.Influxdb;
@@ -66,7 +67,8 @@ public class InfluxdbReporter  {
 	public static class Builder {
 
 		private final MetricRegistry registry;
-		private Clock clock;
+		private boolean autoCreateDB;
+        private Clock clock;
 		private String prefix;
 		private TimeUnit rateUnit;
 		private TimeUnit durationUnit;
@@ -90,6 +92,7 @@ public class InfluxdbReporter  {
 			this.protocol = new HttpInfluxdbProtocol();
 			this.influxdbVersion = InfluxdbCompatibilityVersions.LATEST;
 			this.tags = new HashMap<>();
+			this.autoCreateDB=true;
 		}
 
 		/**
@@ -100,6 +103,17 @@ public class InfluxdbReporter  {
 		 */
 		public Builder withClock(Clock clock) {
 			this.clock = clock;
+			return this;
+		}
+
+      /**
+       * Automatically create the database if it does not exist.
+       *
+       * @param autocreate a boolean
+       * @return {@code this}
+       */
+		public Builder withAutoCreateDB(boolean autocreate) {
+		  this.autoCreateDB = autocreate;
 			return this;
 		}
 
@@ -191,7 +205,7 @@ public class InfluxdbReporter  {
 		}
 
 		/**
-		 * Operates with influxdb version less or equal than 08. 
+		 * Operates with influxdb version less or equal than 08.
 		 * @return the builder itself
 		 */
 		public Builder v08() {
@@ -254,7 +268,11 @@ public class InfluxdbReporter  {
 
 		private Sender buildSender() {
 			if (protocol instanceof HttpInfluxdbProtocol) {
-				return new HttpInlinerSender((HttpInfluxdbProtocol) protocol);
+          HttpInfluxdbProtocol httpInfluxdbProtocol = (HttpInfluxdbProtocol) this.protocol;
+          if (this.autoCreateDB ) {
+              HttpDatabaseCreator.run(httpInfluxdbProtocol);
+          }
+          return new HttpInlinerSender(httpInfluxdbProtocol);
 				// TODO allow registration of transformers
 				// TODO evaluate need of prefix (vs tags)
 			} else if (protocol instanceof UdpInfluxdbProtocol) {

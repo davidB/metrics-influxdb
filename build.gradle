@@ -1,7 +1,7 @@
 plugins {
 	id "java-library"
 	id "maven-publish"
-	id "com.jfrog.bintray" version "1.6"
+	id "com.jfrog.bintray" version "1.8.4"
 }
 
 group = "com.github.davidb"

@@ -2,7 +2,7 @@ plugins {
 	id "java"
 	id "maven-publish"
 	id "eclipse"
-	id "org.dm.bundle" version "0.8.2"
+	id "org.dm.bundle" version "0.10.0"
 	id "nebula.provided-base" version "2.2.2"
 	id "com.jfrog.bintray" version "1.6"
 }

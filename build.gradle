@@ -18,7 +18,7 @@ dependencies {
 	implementation 'org.slf4j:slf4j-api:1.7.29'
 
 	testImplementation 'junit:junit:4.12'
-	testImplementation 'org.testng:testng:7.0.0'
+	testImplementation 'org.testng:testng:7.1.0'
 	testImplementation 'org.hamcrest:hamcrest-all:1.3'
 	testImplementation 'org.easytesting:fest-assert-core:2.0M10'
 	testImplementation 'org.mockito:mockito-all:1.10.19'

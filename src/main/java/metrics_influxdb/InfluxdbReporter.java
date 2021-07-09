@@ -24,6 +24,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 
 import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
+import metrics_influxdb.api.measurements.MetricsAdapter;
 import metrics_influxdb.measurements.HttpInlinerSender;
 import metrics_influxdb.measurements.MeasurementReporter;
 import metrics_influxdb.measurements.Sender;
@@ -40,9 +41,9 @@ import metrics_influxdb.v08.ReporterV08;
  * A reporter which publishes metric values to a InfluxDB server.
  *
  * @see <a href="http://influxdb.org/">InfluxDB - An open-source distributed
- *      time series database with no external dependencies.</a>
+ * time series database with no external dependencies.</a>
  */
-public class InfluxdbReporter  {
+public class InfluxdbReporter {
 
 	static enum InfluxdbCompatibilityVersions {
 		V08, LATEST;
@@ -51,8 +52,7 @@ public class InfluxdbReporter  {
 	/**
 	 * Returns a new {@link Builder} for {@link InfluxdbReporter}.
 	 *
-	 * @param registry
-	 *          the registry to report
+	 * @param registry the registry to report
 	 * @return a {@link Builder} instance for a {@link InfluxdbReporter}
 	 */
 	public static Builder forRegistry(MetricRegistry registry) {
@@ -81,6 +81,7 @@ public class InfluxdbReporter  {
 		@VisibilityIncreasedForTests Influxdb influxdbDelegate;
 		@VisibilityIncreasedForTests Map<String, String> tags;
 		@VisibilityIncreasedForTests MetricMeasurementTransformer transformer = MetricMeasurementTransformer.NOOP;
+		@VisibilityIncreasedForTests MetricsAdapter adapter = MetricsAdapter.NOOP;
 
 		private Builder(MetricRegistry registry) {
 			this.registry = registry;
@@ -197,8 +198,8 @@ public class InfluxdbReporter  {
 			default:
 				Sender s = buildSender();
 				reporter = executor == null
-						? new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, clock, tags, transformer)
-						: new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, clock, tags, transformer, executor)
+						? new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, clock, tags, transformer, adapter)
+						: new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, clock, tags, transformer, adapter, executor)
 						;
 			}
 			return reporter;
@@ -247,14 +248,25 @@ public class InfluxdbReporter  {
 			return this;
 		}
 
+		/**
+		 * Registers an adapter for the measurements.
+		 * @param adapter the adapter object
+		 * @return
+		 */
+		public Builder adapter(MetricsAdapter adapter) {
+			Objects.requireNonNull(adapter, "given MetricsAdapter cannot be null");
+			this.adapter = adapter;
+			return this;
+		}
+
 		private Influxdb buildInfluxdb() {
 			if (protocol instanceof HttpInfluxdbProtocol) {
 				try {
 					HttpInfluxdbProtocol p = (HttpInfluxdbProtocol) protocol;
 					return new InfluxdbHttp(p.scheme, p.host, p.port, p.database, p.user, p.password, durationUnit);
-				} catch(RuntimeException exc) {
+				} catch (RuntimeException exc) {
 					throw exc;
-				} catch(Exception exc) {
+				} catch (Exception exc) {
 					// wrap exception into RuntimeException
 					throw new RuntimeException(exc.getMessage(), exc);
 				}

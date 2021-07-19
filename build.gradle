@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-	implementation 'io.dropwizard.metrics:metrics-core:4.1.18'
+	implementation 'io.dropwizard.metrics:metrics-core:4.2.3'
 	implementation 'org.slf4j:slf4j-api:1.7.31'
 
 	testImplementation 'junit:junit:4.13.2'

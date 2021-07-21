@@ -23,7 +23,7 @@ dependencies {
 	testImplementation 'org.easytesting:fest-assert-core:2.0M10'
 	testImplementation 'org.mockito:mockito-all:1.10.19'
 	testImplementation 'com.google.guava:guava:23.0'
-	testRuntimeOnly 'org.slf4j:slf4j-simple:1.7.31'
+	testRuntimeOnly 'org.slf4j:slf4j-simple:1.7.32'
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8

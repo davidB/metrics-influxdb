@@ -82,7 +82,7 @@ public class HttpInlinerSender extends QueueableSender {
 				LOGGER.info("{} Measures sent to {}://{}:{} but not saved by infludb, reason:\n{}", measures.size(), writeURL.getProtocol(), writeURL.getHost(), writeURL.getPort(), Miscellaneous.readFrom(con.getInputStream()));
 				break;
 			default:
-				LOGGER.info("failed to send {} Measures to {}://{}:{}, HTTP CODE received: {}\n", measures.size(), writeURL.getProtocol(), writeURL.getHost(), writeURL.getPort(), responseCode,  Miscellaneous.readFrom(con.getInputStream()));
+				LOGGER.info("failed to send {} Measures to {}://{}:{}, HTTP CODE received: {}\n", measures.size(), writeURL.getProtocol(), writeURL.getHost(), writeURL.getPort(), responseCode);
 				break;
 			}
 
